@@ -4,7 +4,10 @@ __pycache__/
 *$py.class
 *.json
 *.csv
+<<<<<<< HEAD
+=======
 *.txt
+>>>>>>> f81b424fc39b9bafb38733fa40ff6b7e5fb66441
 
 # C extensions
 *.so
