@@ -40,3 +40,12 @@ uvicorn
 # tests
 httpx<0.28
 pytest-asyncio
+
+# Data Wrangling
+xarray
+netcdf4
+pyshp
+shapely
+folium
+geopandas
+pandas_gbq
