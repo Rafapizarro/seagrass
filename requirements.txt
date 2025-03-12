@@ -20,6 +20,7 @@ protobuf==3.19.6
 h5py==3.10.0
 db-dtypes
 pyarrow
+shapely
 
 geopandas
 
@@ -48,3 +49,8 @@ pytest-asyncio
 streamlit
 folium
 streamlit_folium
+xarray
+netcdf4
+pyshp
+geopandas
+pandas_gbq
