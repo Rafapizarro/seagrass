@@ -12,7 +12,9 @@ BUCKET_NAME = os.environ.get("BUCKET_NAME")
 LOCAL_DATA_PATH = os.path.join(os.path.expanduser('~'), ".lewagon", "mlops", "data")
 LOCAL_REGISTRY_PATH =  os.path.join(os.path.expanduser('~'), ".lewagon", "mlops", "training_outputs")
 
-TABLE_NAMES = ["seagrass"]
+##################  DATABASE  #####################
+
+TABLE_NAMES = ["avg_temp", "bottom_temp", "cholorophyll", "depth", "nutrients", "points", "polygons", "salinity"]
 
 ################## VALIDATIONS #################
 

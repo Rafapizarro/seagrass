@@ -9,6 +9,7 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+
 def get_data_with_cache(
         gcp_project:str,
         query:str,
@@ -19,22 +20,22 @@ def get_data_with_cache(
     Retrieve `query` data from BigQuery, or from `cache_path` if the file exists
     Store at `cache_path` if retrieved from BigQuery for future use
     """
-    # TODO : change the code if we want this locally / BigQuery
-    if cache_path.is_file():
-        print(Fore.BLUE + "\nLoad data from local CSV..." + Style.RESET_ALL)
-        df = pd.read_csv(cache_path, header='infer' if data_has_header else None)
-    else:
+    # # TODO : change the code if we want this locally / BigQuery
+    # if cache_path.is_file():
+    #     print(Fore.BLUE + "\nLoad data from local CSV..." + Style.RESET_ALL)
+    #     df = pd.read_csv(cache_path, header='infer' if data_has_header else None)
+    # else:
 
-        print(Fore.BLUE + "\nLoad data from BigQuery server..." + Style.RESET_ALL)
-        # TODO : load from BigQuery
-        # client = bigquery.Client(project=gcp_project)
-        # query_job = client.query(query)
-        # result = query_job.result()
-        # df = result.to_dataframe()
+    print(Fore.BLUE + "\nLoad data from BigQuery server..." + Style.RESET_ALL)
+    # TODO : load from BigQuery
+    client = bigquery.Client(project=gcp_project)
+    query_job = client.query(query)
+    result = query_job.result()
+    df = result.to_dataframe()
 
-        # Store as CSV if the BQ query returned at least one valid line
-        if df.shape[0] > 1:
-            df.to_csv(cache_path, header=data_has_header, index=False)
+        # # Store as CSV if the BQ query returned at least one valid line
+        # if df.shape[0] > 1:
+        #     df.to_csv(cache_path, header=data_has_header, index=False)
 
     print(f"✅ Data loaded, with shape {df.shape}")
 
