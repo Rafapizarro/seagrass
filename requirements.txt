@@ -41,6 +41,11 @@ uvicorn
 httpx<0.28
 pytest-asyncio
 
-# Geo utils
-geopandas
+# Data Wrangling
+xarray
+netcdf4
+pyshp
 shapely
+folium
+geopandas
+pandas_gbq
