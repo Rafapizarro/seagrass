@@ -12,7 +12,7 @@ def load_features(limit=None) -> gpd.GeoDataFrame:
     """
 
     if limit:
-        query += f" LIMIT 1000"
+        query += f" LIMIT {limit}"
 
     data = client.query(query).to_dataframe()
     df = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.lon, data.lat))
@@ -28,7 +28,8 @@ def load_targets(limit=None) -> gpd.GeoDataFrame:
     """
 
     if limit:
-        query += f" LIMIT 1000"
+        query += f" LIMIT {limit}"
+        print(query)
 
     data = client.query(query).to_dataframe()
     data["coordinates"] = data["coordinates"].apply(wkt.loads)
