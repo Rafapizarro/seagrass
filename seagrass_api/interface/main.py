@@ -10,35 +10,33 @@ from colorama import Fore, Style
 
 def preprocess(
     # TODO : WHICH features we preprocess
+    min_date='2022-01-01', max_date='2023-01-01',
     features: list=[]
 ) -> None:
     """
     Requests for all data needed
     """
-    # TODO : TO CHANGE IF WE WANT ANOTHER TABLE
-    table_name = "seagrass"
+    all_data = {}
 
-    # Selection of the BQ table
-    bq_table = TABLE_NAMES[table_name]
 
     # Selection of the features
     # TODO : pass into query builders : https://dev.to/chanon-mike/using-python-and-orm-sqlalchemy-with-google-bigquery-4gga
     query = f"""
         SELECT *
-        FROM `{GCP_PROJECT}`.{BQ_DATASET}.{bq_table}_{DATA_SIZE}
-        WHERE condition
-        ORDER BY pickup_datetime
+        FROM `{GCP_PROJECT}`.{BQ_DATASET}.seagrass_global_target
     """
+
 
     # Retrieve data using `get_data_with_cache`
     # TODO : save data with specific features
-    data_query_cache_path = Path(LOCAL_DATA_PATH).joinpath("raw", f"query_{features}_{DATA_SIZE}.csv")
+    # data_query_cache_path = Path(LOCAL_DATA_PATH).joinpath("raw", f"query_{features}_{DATA_SIZE}.csv")
     data_query = get_data_with_cache(
         query=query,
         gcp_project=GCP_PROJECT,
-        cache_path=data_query_cache_path,
+        # cache_path=data_query_cache_path,
         data_has_header=True
     )
+
 
     # Process data
     # TODO : clean all data
@@ -141,7 +139,7 @@ def pred(X_pred: pd.DataFrame = None) -> np.ndarray:
 
 if __name__ == '__main__':
     # TODO : MAKE THE PIPELINE
-    preprocess()
+    preprocess(min_date='2009-01-01', max_date='2015-01-01')
     train()
     evaluate()
     pred()

@@ -17,12 +17,19 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-@app.get("/predict")
-def predict():
+@app.get("/all_data")
+def get_all_data():
     """
+    Get all data from big query
     """
     return {'prediction': 'flower'}
 
+@app.get("/data")
+def get_data(
+        feature: str
+    ):
+
+    return {'greeting': 'Hello'}
 
 
 @app.get("/")
