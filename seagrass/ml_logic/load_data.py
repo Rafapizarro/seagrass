@@ -11,16 +11,23 @@ def load_features(
     cache_path:Path,
     limit=None) -> gpd.GeoDataFrame:
     """
-    Positional Argument: complete local path to your features parquet file.
-    Output: Features GeoDataFrame.
+    Parameters:
+    --------
+    cache_path:Path
+        Local path to your features parquet file.
+    limit:int, optional
+        Limit the number of rows fetched from BigQuery.
+
+    Returns:
+    --------
+    GeoDataFrame
+        Features data with CRS set to EPSG:32633.
     """
 
     if Path(cache_path).is_file():
-        print("\nLoad data from local Parquet...")
+        print("\nLoad data from local Parquet file...")
         data = pd.read_parquet(cache_path)
-        df = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.lon, data.lat))
-        df.crs = "EPSG:32633"
-        df.to_crs("EPSG:32633")
+
     else:
         print("\nLoad data from BigQuery server...")
         client = bigquery.Client()
@@ -31,32 +38,36 @@ def load_features(
         if limit:
             query += f" LIMIT {limit}"
         data = client.query(query).to_dataframe()
-        df = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.lon, data.lat))
-        df.crs = "EPSG:32633"
-        df.to_crs("EPSG:32633")
-        df.to_parquet(cache_path)
+        data.to_parquet(cache_path)
 
-    return df
+    gdf = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.lon, data.lat), crs="EPSG:32633")
+
+    return gdf
 
 
 def load_targets(
     cache_path:Path,
     limit=None) -> gpd.GeoDataFrame:
     """
-    cache_path: Complete local path to your target parquet file.
-    Output: Target GeoDataFrame.
+    Parameters:
+    --------
+    cache_path:Path
+        Local path to your features target file.
+    limit:int, optional
+        Limit the number of rows fetched from BigQuery.
+
+    Returns:
+    --------
+    GeoDataFrame
+        Target data with CRS set to EPSG:32633.
     """
 
     if Path(cache_path).is_file():
-        print("\nLoad data from local Parquet...")
+        print("\nLoad data from local Parquet file...")
         data = pd.read_parquet(cache_path)
-        data["coordinates"] = data["coordinates"].apply(wkt.loads)
-        df = gpd.GeoDataFrame(data, geometry="coordinates")
-        df.crs = "EPSG:32633"
-        df.to_crs("EPSG:32633")
 
     else:
-        print("\nLoad data from BigQuery...")
+        print("\nLoad data from BigQuery server...")
         client = bigquery.Client()
         query = f"""
         SELECT *
@@ -66,21 +77,27 @@ def load_targets(
             query += f" LIMIT {limit}"
         data = client.query(query).to_dataframe()
         data.to_parquet(cache_path)
-        data["coordinates"] = data["coordinates"].apply(wkt.loads)
-        df = gpd.GeoDataFrame(data, geometry="coordinates")
-        df.crs = "EPSG:32633"
-        df.to_crs("EPSG:32633")
 
-    return df
+    data["coordinates"] = data["coordinates"].apply(wkt.loads)
+    gdf = gpd.GeoDataFrame(data, geometry="coordinates", crs="EPSG:32633")
+
+    return gdf
 
 def merge_data(
     features: gpd.GeoDataFrame,
     targets: gpd.GeoDataFrame,
-    max_distance:int) -> gpd.GeoDataFrame:
+    max_distance:float) -> gpd.GeoDataFrame:
     """
-    features: Features GeoDataFrame. targets: Target GeoDataFrame,
-    max_distance: Distance margin allowed between polygons and points for joining.
-    Coordinate distance (e.g. 0.01 is ~1 km).
+    Parameters:
+    --------
+    features: gpd.GeoDataFrame
+        Feature data with CRS set to EPSG:32633.
+    target: gpd.GeoDataFrame
+        Target data with CRS set to EPSG:32633.
+    max_distance: float
+        Distance margin allowed between polygons and points for joining.
+        Coordinate distance (e.g. 0.01 is ~1 km).
+    --------
     Output: Merged geoDataFrame (left-join).
     """
     print("\nMerging files...")
