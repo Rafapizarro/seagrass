@@ -4,24 +4,32 @@ from shapely import wkt
 from google.cloud import bigquery
 
 
-def load_features() -> gpd.GeoDataFrame:
+def load_features(limit=None) -> gpd.GeoDataFrame:
     client = bigquery.Client()
     query = """
     SELECT *
     FROM `seagrass-lewagon.seagrass.merged_features`
     """
+
+    if limit:
+        query += f" LIMIT 1000"
+
     data = client.query(query).to_dataframe()
     df = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.lon, data.lat))
     df.crs = "EPSG:32633"
     df = df.to_crs("EPSG:32633")
     return df
 
-def load_targets() -> gpd.GeoDataFrame:
+def load_targets(limit=None) -> gpd.GeoDataFrame:
     client = bigquery.Client()
-    query = """
+    query = f"""
     SELECT *
     FROM `seagrass-lewagon.seagrass.seagrass_global_target`
     """
+
+    if limit:
+        query += f" LIMIT 1000"
+
     data = client.query(query).to_dataframe()
     data["coordinates"] = data["coordinates"].apply(wkt.loads)
     df = gpd.GeoDataFrame(data, geometry="coordinates")
