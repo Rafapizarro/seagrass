@@ -3,7 +3,7 @@ from multiprocessing import set_start_method
 import pandas as pd
 import uvicorn
 from fastapi import APIRouter, FastAPI
-from ml_logic.registry import load_model
+from seagrass.ml_logic.registry import load_model
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
