@@ -33,9 +33,9 @@ def get_data_with_cache(
     result = query_job.result()
     df = result.to_dataframe()
 
-        # # Store as CSV if the BQ query returned at least one valid line
-        # if df.shape[0] > 1:
-        #     df.to_csv(cache_path, header=data_has_header, index=False)
+    # # Store as CSV if the BQ query returned at least one valid line
+    # if df.shape[0] > 1:
+    #     df.to_csv(cache_path, header=data_has_header, index=False)
 
     print(f"✅ Data loaded, with shape {df.shape}")
 

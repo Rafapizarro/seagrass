@@ -9,8 +9,8 @@ BQ_REGION = os.environ.get("BQ_REGION")
 BUCKET_NAME = os.environ.get("BUCKET_NAME")
 
 ##################  CONSTANTS  #####################
-LOCAL_DATA_PATH = os.path.join(os.path.expanduser('~'), ".lewagon", "mlops", "data")
-LOCAL_REGISTRY_PATH =  os.path.join(os.path.expanduser('~'), ".lewagon", "mlops", "training_outputs")
+LOCAL_DATA_PATH = os.path.join(os.path.expanduser('~'), ".seagrass-project", "mlops", "data")
+LOCAL_REGISTRY_PATH =  os.path.join(os.path.expanduser('~'), ".seagrass-project", "mlops", "training_outputs")
 
 ##################  DATABASE  #####################
 

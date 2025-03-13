@@ -1,8 +1,8 @@
 import numpy as np
 
-from seagrass_api.ml_logic.data import clean_data, get_data_with_cache, load_data_to_bq
-from seagrass_api.ml_logic.registry import load_model, save_model
-from seagrass_api.params import *
+from ml_logic.data import clean_data, get_data_with_cache, load_data_to_bq
+from ml_logic.registry import load_model, save_model
+from params import *
 
 from pathlib import Path
 import pandas as pd

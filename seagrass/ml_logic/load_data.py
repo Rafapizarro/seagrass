@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 import geopandas as gpd
 from shapely import wkt
@@ -22,7 +23,7 @@ def load_features(limit=None) -> gpd.GeoDataFrame:
 
 def load_targets(limit=None) -> gpd.GeoDataFrame:
     client = bigquery.Client()
-    query = f"""
+    query = """
     SELECT *
     FROM `seagrass-lewagon.seagrass.seagrass_global_target`
     """
@@ -40,6 +41,7 @@ def load_targets(limit=None) -> gpd.GeoDataFrame:
 
 def merge_data(features: gpd.GeoDataFrame, targets: gpd.GeoDataFrame,max_distance:int) -> gpd.GeoDataFrame:
     df = gpd.sjoin_nearest(features, targets, how="left",max_distance=max_distance)
+
     return df
 
 if __name__ == "__main__":
