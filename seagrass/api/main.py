@@ -3,7 +3,7 @@ from multiprocessing import set_start_method
 import pandas as pd
 import uvicorn
 from fastapi import APIRouter, FastAPI
-from seagrass_api.ml_logic.registry import load_model
+from ml_logic.registry import load_model
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -38,4 +38,4 @@ def root():
 
 
 if __name__ == "__main__":
-    uvicorn.run("seagrass_api.api.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("seagrass.api.main:app", host="0.0.0.0", port=8000, reload=True)
