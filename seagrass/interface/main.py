@@ -1,81 +1,99 @@
 import numpy as np
+import os
 
-from ml_logic.data import clean_data, get_data_with_cache, load_data_to_bq
-from ml_logic.registry import load_model, save_model
-from params import *
+from numerize import numerize
+
+from seagrass.ml_logic.registry import load_model, save_model
 
 from pathlib import Path
 import pandas as pd
 from colorama import Fore, Style
 
+from seagrass.ml_logic.load_data import load_features, load_targets, merge_data
+from seagrass.params import BQ_DATASET, GCP_PROJECT, LOCAL_DATA_PATH
+from seagrass.utils import stringify_crs_distance, get_data_size
+
 def preprocess(
-    # TODO : WHICH features we preprocess
-    min_date='2022-01-01', max_date='2023-01-01',
-    features: list=[]
+    max_distance=0.01,
+    limit=None
 ) -> None:
     """
-    Requests for all data needed
+    Requests and preprocess the data needed.
+
+    Parameters
+    ----------
+    max_distance : float
+        Maximum distance (in CRS units) allowed between polygons and points for joining.
+        For EEPSG:3035, distance is measured in meters (e.g., 1000 = 1 km).
+    limit : int or None
+        Size of the data requested.
+        If None, fetch all.
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Merged GeoDataFrame resulting from a left spatial join.
     """
-    all_data = {}
+    # TODO : save data with :
+    #   - size of data
+    #   - CRS distance
 
+    # Set limit of the data to train
+    size_data = get_data_size(limit)
 
-    # Selection of the features
-    # TODO : pass into query builders : https://dev.to/chanon-mike/using-python-and-orm-sqlalchemy-with-google-bigquery-4gga
-    query = f"""
-        SELECT *
-        FROM `{GCP_PROJECT}`.{BQ_DATASET}.seagrass_global_target
-    """
+    # Set CRS distance for the points embedded in the target polygons
+    str_crs_distance = stringify_crs_distance(max_distance)
 
+    print(f"Merge data with {size_data} data size, CRS : {str_crs_distance} km")
 
-    # Retrieve data using `get_data_with_cache`
-    # TODO : save data with specific features
-    # data_query_cache_path = Path(LOCAL_DATA_PATH).joinpath("raw", f"query_{features}_{DATA_SIZE}.csv")
-    data_query = get_data_with_cache(
-        query=query,
-        gcp_project=GCP_PROJECT,
-        # cache_path=data_query_cache_path,
-        data_has_header=True
+    features_cache_path = os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_features_{size_data}.parquet")
+    targets_cache_path = os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_targets_{size_data}.parquet")
+
+    main_data_cache_path = os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_data_{size_data}_{str_crs_distance}_km.parquet")
+
+    features = load_features(features_cache_path, limit)
+    targets = load_targets(targets_cache_path, limit)
+
+    data_query = merge_data(
+        cache_path=main_data_cache_path,
+        features=features,
+        targets=targets,
+        max_distance=max_distance,
+        size_data=size_data
     )
-
 
     # Process data
-    # TODO : clean all data
-    data_clean = clean_data(data_query)
-
-    # TODO : ALL PREPROCESS STEPS
-    # TODO : split ?
-    # TODO : preprocess_features(X)
-    data_processed = pd.DataFrame([])
-
-    # TODO : load data preprocessed into BigQuery
-    load_data_to_bq(
-        data_processed,
-        gcp_project=GCP_PROJECT,
-        bq_dataset=BQ_DATASET,
-        table=f'processed_{DATA_SIZE}',
-        truncate=True
-    )
+    # # TODO : clean all data
+    # data_clean = clean_data(data_query)
 
 
 def train(
         # TODO : WHICH features the user want
-        features: list=[],
+        max_distance=0.01,
+        limit=None,
         split_ratio: float = 0.02, # 0.02 represents ~ 1 month of validation data on a 2009-2015 train set
         learning_rate=0.0005,
         batch_size = 256,
         patience = 2
     ) -> float:
-    # TODO : TO CHANGE IF WE WANT ANOTHER TABLE
-    table_name = "seagrass"
+    # TODO : train data with :
+    #   - size of data
+    #   - CRS distance
+
+    # Set limit of the data to train
+    size_data = get_data_size(limit)
+
+    # Set CRS distance for the points embedded in the target polygons
+    str_crs_distance = stringify_crs_distance(max_distance)
 
     # Selection of the BQ table
-    bq_table = TABLE_NAMES[table_name]
+    bq_table = f"data_{size_data}_{str_crs_distance}_km"
 
     # Selection of the features
     # TODO : pass into query builders : https://dev.to/chanon-mike/using-python-and-orm-sqlalchemy-with-google-bigquery-4gga
     query = f"""
         SELECT *
-        FROM `{GCP_PROJECT}`.{BQ_DATASET}.{bq_table}_{DATA_SIZE}
+        FROM `{GCP_PROJECT}`.{BQ_DATASET}.{bq_table}
         WHERE condition
         ORDER BY pickup_datetime
     """
@@ -99,13 +117,27 @@ def train(
 
 def evaluate(
         # TODO : WHICH features we evaluate
-        features: list=[],
+        max_distance=0.01,
+        limit=None,
         stage: str = "Production"
     ) -> float:
     """
     Evaluate the performance of the latest production model on processed data
     Return METRICS
     """
+    # TODO : evaluate data with :
+    #   - size of data
+    #   - CRS distance
+
+    # Set limit of the data to train
+    size_data = get_data_size(limit)
+
+    # Set CRS distance for the points embedded in the target polygons
+    crs_distance = stringify_crs_distance(max_distance)
+
+    # Selection of the BQ table
+    bq_table = f"data_{size_data}_{crs_distance}_km"
+
     print(Fore.MAGENTA + "\n⭐️ Use case: evaluate" + Style.RESET_ALL)
 
     # TODO : check if we can loed models
@@ -115,9 +147,10 @@ def evaluate(
     # TODO : handle the features
     # Query your BigQuery processed table and get data_processed using `get_data_with_cache`
     query = f"""
-        SELECT * EXCEPT(_0)
-        FROM `{GCP_PROJECT}`.{BQ_DATASET}.processed_{DATA_SIZE}
-        WHERE {features}'
+        SELECT *
+        FROM `{GCP_PROJECT}`.{BQ_DATASET}.{bq_table}
+        WHERE condition
+        ORDER BY pickup_datetime
     """
 
     return
@@ -139,7 +172,7 @@ def pred(X_pred: pd.DataFrame = None) -> np.ndarray:
 
 if __name__ == '__main__':
     # TODO : MAKE THE PIPELINE
-    preprocess(min_date='2009-01-01', max_date='2015-01-01')
-    train()
-    evaluate()
-    pred()
+    preprocess(max_distance=0.01, limit=10000)
+    # train(max_distance=0.01, limit=10000)
+    # evaluate(max_distance=0.01, limit=10000)
+    # pred()

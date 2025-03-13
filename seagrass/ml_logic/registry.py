@@ -1,6 +1,6 @@
 from datetime import time
 from tensorflow import keras
-from params import *
+from seagrass.params import *
 from google.cloud import storage
 
 from colorama import Fore, Style

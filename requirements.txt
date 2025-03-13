@@ -49,3 +49,4 @@ shapely
 folium
 geopandas
 pandas_gbq
+numerize
