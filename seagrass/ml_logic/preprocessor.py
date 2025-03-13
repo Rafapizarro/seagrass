@@ -3,11 +3,16 @@ import pandas as pd
 
 from sklearn.pipeline import make_pipeline
 from sklearn.compose import ColumnTransformer, make_column_transformer
-from sklearn.preprocessing import OneHotEncoder, FunctionTransformer
+from sklearn.preprocessing import OneHotEncoder, FunctionTransformer, LabelEncoder
 from colorama import Fore, Style
 
 def preprocess_features(X: pd.DataFrame) -> np.ndarray:
     # TODO : ALL PREPROCESSING STEPS : feat. engineering, rescaler, encoder, etc
+    encoder = LabelEncoder()
+
+    merge_df['FAMILY_lab_encoded'] = encoder.fit_transform(merge_df['FAMILY'])
+
+
     def create_sklearn_preprocessor() -> ColumnTransformer:
         return
 
