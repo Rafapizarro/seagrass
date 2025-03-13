@@ -96,12 +96,12 @@ def merge_data(
     Parameters
     ----------
     features : gpd.GeoDataFrame
-        Feature data with CRS set to EPSG:32633.
+        Feature data with CRS set to EEPSG:3035.
     targets : gpd.GeoDataFrame
-        Target data with CRS set to EPSG:32633.
+        Target data with CRS set to EEPSG:3035.
     max_distance : float
         Maximum distance (in CRS units) allowed between polygons and points for joining.
-        For EPSG:32633, distance is measured in meters (e.g., 1000 = 1 km).
+        For EEPSG:3035, distance is measured in meters (e.g., 1000 = 1 km).
 
     Returns
     -------
