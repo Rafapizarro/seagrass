@@ -22,6 +22,20 @@ class XGBTrainer:
             random_state=42,
         )
 
+
+    def fit_model(self, X_train, y_train, X_val, y_val):
+        sample_weight = compute_sample_weight(class_weight="balanced", y=y_train)
+        self.model.fit(
+            X_train,
+            y_train,
+            sample_weight=sample_weight,
+            eval_set=[(X_val, y_val)],
+            verbose=False,
+        )
+        self.trained = True
+        return self
+
+
     def train_eval(self, X_train, y_train, X_val, y_val, X_test, y_test):
         print("Training model...\n")
 
