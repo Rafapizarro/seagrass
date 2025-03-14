@@ -61,7 +61,7 @@ def train_test_val_split(merge_df: pd.DataFrame):
             "Cymodoceaceae": 3,
             "Hydrocharitaceae": 1,
         }
-    )
+    ).fillna(0)
 
     # Split the data into training, validation, and test sets
     X_train, X_test, y_train, y_test = train_test_split(
