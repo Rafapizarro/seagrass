@@ -7,7 +7,7 @@ __pycache__/
 *.parquet
 
 #folders
-/data
+data/
 
 # C extensions
 *.so
