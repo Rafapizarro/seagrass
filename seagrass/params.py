@@ -8,7 +8,8 @@ BQ_DATASET = os.environ.get("BQ_DATASET")
 BQ_REGION = os.environ.get("BQ_REGION")
 BUCKET_NAME = os.environ.get("BUCKET_NAME")
 
-ROOT_PATH = os.environ.get("ROOT_PATH")
+COPERNICUSMARINE_SERVICE_USERNAME = os.environ.get("COPERNICUSMARINE_SERVICE_USERNAME")
+COPERNICUSMARINE_SERVICE_PASSWORD = os.environ.get("COPERNICUSMARINE_SERVICE_PASSWORD")
 
 ##################  CONSTANTS  #####################
 LOCAL_DATA_PATH = os.path.join(os.path.expanduser('~'), ".seagrass", "mlops", "data")

@@ -173,6 +173,6 @@ def pred(X_pred: pd.DataFrame = None) -> np.ndarray:
 if __name__ == '__main__':
     # TODO : MAKE THE PIPELINE
     preprocess(max_distance=0.01, limit=10000)
-    # train(max_distance=0.01, limit=10000)
+    train(max_distance=0.01, limit=10000)
     # evaluate(max_distance=0.01, limit=10000)
     # pred()
