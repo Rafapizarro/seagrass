@@ -8,7 +8,7 @@ from seagrass.ml_logic.load_data import load_features, load_targets, merge_data
 from seagrass.params import LOCAL_DATA_PATH, BQ_DATASET, FEATURE_LABELS, TARGET_LABEL
 
 
-def get_data(merged_data_path) -> gpd.GeoDataFrame:
+def get_data(merged_data_path, max_distance) -> gpd.GeoDataFrame:
     """
     Requests for all data needed
     """
@@ -30,7 +30,7 @@ def get_data(merged_data_path) -> gpd.GeoDataFrame:
             cache_path=merged_data_path,
             features=features,
             targets=target,
-            max_distance=0.01,
+            max_distance=max_distance,
         )
 
     return data

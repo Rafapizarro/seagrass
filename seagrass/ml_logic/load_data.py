@@ -22,7 +22,7 @@ def load_features(
     Returns
     -------
     GeoDataFrame
-        Features data with CRS set to EPSG:4326.
+        Features data with CRS set to EPSG:32633.
     """
 
     if Path(cache_path).is_file():
@@ -41,7 +41,7 @@ def load_features(
         data = client.query(query).to_dataframe()
         data.to_parquet(cache_path)
 
-    gdf = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.lon, data.lat), crs="EPSG:4326")
+    gdf = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.lon, data.lat), crs="EPSG:32633")
 
     return gdf
 
@@ -62,7 +62,7 @@ def load_targets(
     Returns
     -------
     GeoDataFrame
-        Target data with CRS set to EPSG:4326.
+        Target data with CRS set to EPSG:32633.
     """
 
     if Path(cache_path).is_file():
@@ -82,7 +82,7 @@ def load_targets(
         data.to_parquet(cache_path)
 
     data["coordinates"] = data["coordinates"].apply(wkt.loads)
-    gdf = gpd.GeoDataFrame(data, geometry="coordinates", crs="EPSG:4326")
+    gdf = gpd.GeoDataFrame(data, geometry="coordinates", crs="EPSG:32633")
 
     return gdf
 
@@ -96,9 +96,9 @@ def merge_data(
     Parameters
     ----------
     features : gpd.GeoDataFrame
-        Feature data with CRS set to EEPSG:3035.
+        Feature data with CRS set to EPSG:32633.
     targets : gpd.GeoDataFrame
-        Target data with CRS set to EEPSG:3035.
+        Target data with CRS set to EPSG:32633.
     max_distance : float
         Maximum distance (in CRS units) allowed between polygons and points for joining.
         For EEPSG:3035, distance is measured in meters (e.g., 0.01 degrees = ~1 km).

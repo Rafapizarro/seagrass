@@ -1,7 +1,7 @@
 import os
 import xgboost as xgb
 from pathlib import Path
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, classification_report
 from seagrass.params import LOCAL_REGISTRY_PATH
 from sklearn.utils.class_weight import compute_sample_weight
 
@@ -22,8 +22,8 @@ class XGBTrainer:
             random_state=42,
         )
 
-    def train(self, X_train, y_train, X_val, y_val):
-        print("\nTraining model...\n")
+    def train_eval(self, X_train, y_train, X_val, y_val, X_test, y_test):
+        print("Training model...\n")
 
         sample_weight = compute_sample_weight(class_weight="balanced", y=y_train)
 
@@ -35,15 +35,17 @@ class XGBTrainer:
             verbose=False,
         )
         self.trained = True
-        print("\nTraining complete.\n")
+        print("Training complete.\n")
 
-        y_pred_proba = self.model.predict_proba(X_val)
+        y_pred_proba = self.model.predict_proba(X_test)
         y_pred = y_pred_proba.argmax(axis=1)
 
-        f1 = f1_score(y_val, y_pred, average="macro")
-        print(f"\nMacro F1 score: {f1:.6f}\n")
+        f1 = f1_score(y_test, y_pred, average="macro")
+        class_report = classification_report(y_test, y_pred)
+        print(class_report)
 
-        return f1
+        return print(f"\nMacro F1 score: {f1:.6f}\n")
+
 
     def save(self, f1: float):
         self.f1 = f1
