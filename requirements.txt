@@ -50,3 +50,5 @@ folium
 geopandas
 pandas_gbq
 numerize
+
+xgboost
