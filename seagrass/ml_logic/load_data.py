@@ -3,8 +3,11 @@ import pandas as pd
 import geopandas as gpd
 from shapely import wkt
 from pathlib import Path
-from seagrass.params import GCP_PROJECT, BQ_DATASET
+from seagrass.ml_logic.data import load_data_to_bq
+from seagrass.params import *
 from google.cloud import bigquery
+
+from seagrass.utils import stringify_crs_distance
 
 
 def load_features(cache_path: Path, limit=None) -> gpd.GeoDataFrame:
@@ -61,7 +64,7 @@ def load_targets(cache_path: Path, limit=None) -> gpd.GeoDataFrame:
     Returns
     -------
     GeoDataFrame
-        Target data with CRS set to EPSG:4326.
+        Target data with CRS set to EPSG:32633.
     """
 
     if Path(cache_path).is_file():
@@ -90,7 +93,9 @@ def merge_data(
     cache_path: Path,
     features: gpd.GeoDataFrame,
     targets: gpd.GeoDataFrame,
-    max_distance: int,
+    cache_path: Path,
+    size_data="all",
+    max_distance=0.01,
 ) -> gpd.GeoDataFrame:
     """
     Merge feature and target GeoDataFrames using a spatial nearest join.
@@ -110,10 +115,29 @@ def merge_data(
     gpd.GeoDataFrame
         Merged GeoDataFrame resulting from a left spatial join.
     """
+    if Path(cache_path).is_file():
+        print("\nLoad data from local Parquet file...")
+        df = pd.read_parquet(cache_path)
 
-    print("\nMerging files...\n")
-    df = gpd.sjoin_nearest(features, targets, how="left", max_distance=max_distance)
-    df.to_parquet(cache_path)
-    print("\nMerge complete.\n")
+    else:
+        print("\nMerging files...")
+        df = gpd.sjoin_nearest(features, targets, how="left", max_distance=max_distance)
+        df["geometry"] = df["geometry"].apply(wkt.dumps)
+
+        # Save all main data to local files
+        df.to_parquet(cache_path)
+
+        # Set CRS distance for the points embedded in the target polygons
+        crs_distance = stringify_crs_distance(max_distance)
+
+        # TODO : load data preprocessed into BigQuery
+        load_data_to_bq(
+            df,
+            gcp_project=GCP_PROJECT,
+            bq_dataset=BQ_DATASET,
+            table=f"data_{size_data}_{crs_distance}_km",
+            truncate=True,
+        )
+        print("\nFiles merged!")
 
     return df

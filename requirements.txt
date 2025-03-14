@@ -19,7 +19,13 @@ googleapis-common-protos==1.56.4
 protobuf==3.19.6
 h5py==3.10.0
 db-dtypes
-pyarrow
+shapely
+
+#Models used in notebook
+geopandas
+xgboost
+catboost
+
 # Trick to install the version of Tensorflow depending on your processor: darwin == Mac, ARM == M1
 tensorflow-macos==2.10.0; sys_platform == 'darwin' and 'ARM' in platform_version # Mac M-chips
 tensorflow==2.10.0; sys_platform == 'darwin' and 'ARM' not in platform_version # Mac Intel chips
@@ -41,14 +47,15 @@ uvicorn
 httpx<0.28
 pytest-asyncio
 
-# Data Wrangling
+#user interface
+streamlit
+folium
+streamlit_folium
 xarray
 netcdf4
 pyshp
-shapely
-folium
 geopandas
+pandas_gbq
+numerize
 
-# Models
 xgboost
-hdbscan
