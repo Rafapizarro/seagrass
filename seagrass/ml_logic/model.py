@@ -46,7 +46,7 @@ class XGBTrainer:
         f1 = f1_score(y_test, y_pred, average="macro")
         print(f"\nMacro F1 score: {f1:.6f}\n")
 
-        return print(f"\nMacro F1 score: {f1:.6f}\n")
+        return f1
 
     def save(self, f1: float):
         """Save the trained model with an F1-score-based filename"""
@@ -114,6 +114,7 @@ class Clusterer:
 
         model_dir = os.path.join(LOCAL_REGISTRY_PATH, "models")
         os.makedirs(model_dir, exist_ok=True)
+        #
 
         if filename is None:
             filename = os.path.join(
