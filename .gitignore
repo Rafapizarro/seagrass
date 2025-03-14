@@ -4,6 +4,10 @@ __pycache__/
 *$py.class
 *.json
 *.csv
+*.parquet
+
+#folders
+data/
 data/
 
 # C extensions
@@ -178,3 +182,4 @@ cython_debug/
 
 #Folders
 notebooks/
+seagrass_ui/app3.py
