@@ -3,12 +3,9 @@ from multiprocessing import set_start_method
 import pandas as pd
 import uvicorn
 from fastapi import APIRouter, FastAPI
-from seagrass.ml_logic.preprocessor import preprocess_features
-from seagrass.ml_logic.registry import load_model
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
-app.state.model = load_model()
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,40 +15,12 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-@app.get("/all_data")
-# https:
-def get_seagrass_prediction(
-    latitudes: list,
-    longitudes: list
-):
-    X_pred = pd.DataFrame(dict(
 
-    ))
+@app.get("/predict")
+# http://localhost:8000/predict?latitudes=40,41&longitudes=-1,0
+def get_seagrass_prediction(latitudes: str, longitudes: str):
+    latitudes = latitudes.split(",")
+    longitudes = longitudes.split(",")
 
-    X_processed = preprocess_features(X_pred)
-    y_pred = app.state.model.predict(X_processed)
-
-    return {'seagrass': float(y_pred[0][0])}
-
-@app.get("/all_data")
-def get_all_data():
-    """
-    Get all data from big query
-    """
-    return {'prediction': 'flower'}
-
-@app.get("/data")
-def get_data(
-        feature: str
-    ):
-
-    return {'greeting': 'Hello'}
-
-
-@app.get("/")
-def root():
-    return {'greeting': 'Hello'}
-
-
-if __name__ == "__main__":
-    uvicorn.run("seagrass.api.main:app", host="0.0.0.0", port=8000, reload=True)
+    # Test return from API
+    return {"latitudes": latitudes, "longitudes": longitudes}
