@@ -7,25 +7,6 @@ from sklearn.preprocessing import OneHotEncoder, FunctionTransformer, LabelEncod
 from sklearn.model_selection import train_test_split
 from colorama import Fore, Style
 
-def preprocess_features(X: pd.DataFrame) -> np.ndarray:
-    # TODO : ALL PREPROCESSING STEPS : feat. engineering, rescaler, encoder, etc
-    encoder = LabelEncoder()
-
-    merge_df['FAMILY_lab_encoded'] = encoder.fit_transform(merge_df['FAMILY'])
-
-
-    def create_sklearn_preprocessor() -> ColumnTransformer:
-        return
-
-    print(Fore.BLUE + "\nPreprocessing features..." + Style.RESET_ALL)
-
-    preprocessor = create_sklearn_preprocessor()
-    X_processed = preprocessor.fit_transform(X)
-
-    print("✅ X_processed, with shape", X_processed.shape)
-
-    return X_processed
-
 def train_test_val_split(merge_df: pd.DataFrame):
 
     #First get your FAMILY MAPPED column
