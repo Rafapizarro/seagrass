@@ -21,8 +21,10 @@ class XGBTrainer:
             early_stopping_rounds=20,
             random_state=42,
         )
+        self.trained = False
+        self.model_path = os.path.join(LOCAL_REGISTRY_PATH, "models", "xgb.ubj")
 
-    def train(self, X_train, y_train, X_val, y_val):
+    def train_test(self, X_train, y_train, X_val, y_val):
         print("\nTraining model...\n")
 
         sample_weight = compute_sample_weight(class_weight="balanced", y=y_train)
@@ -46,23 +48,40 @@ class XGBTrainer:
         return f1
 
     def save(self, f1: float):
-        self.f1 = f1
-
+        """Save the trained model with an F1-score-based filename"""
         if not self.trained:
-            raise ValueError("\nError: Model must be trained before saving.\n")
+            raise ValueError("\n❌ Error: Model must be trained before saving.\n")
 
-        self.model_path = os.path.join(
-            LOCAL_REGISTRY_PATH, "models", f"{f1:.3f}xgb.ubj"
-        )
+        model_dir = os.path.join(LOCAL_REGISTRY_PATH, "models")
+        os.makedirs(model_dir, exist_ok=True)  # Ensure directory exists
 
-        os.makedirs(os.path.join(LOCAL_REGISTRY_PATH, "models"), exist_ok=True)
-        self.model.save_model(self.model_path)
-        print("\nModel saved.\n")
+        # Save model with F1 score in filename
+        model_path = os.path.join(model_dir, f"{f1:.3f}_xgb.ubj")
+        self.model.save_model(model_path)
+        print(f"\n✅ Model saved at: {model_path}\n")
 
     def load(self):
-        if not Path(self.model_path).is_file():
-            raise ValueError("\nError: Model must be saved before loading.\n")
+        """Load the most recent saved model automatically"""
+        model_dir = os.path.join(LOCAL_REGISTRY_PATH, "models")
 
-        model = self.model.load_model(self.model_path)
+        # Find all saved models
+        model_files = list(Path(model_dir).glob("*.ubj"))
 
-        return model
+        if not model_files:
+            raise FileNotFoundError(
+                "\n❌ No saved models found! Train and save a model first.\n"
+            )
+
+        # Sort files by most recent (assuming names include scores like '0.853_xgb.ubj')
+        latest_model = max(model_files, key=os.path.getctime)
+
+        # Load the latest model
+        self.model.load_model(str(latest_model))
+        print(f"\n✅ Loaded model: {latest_model}\n")
+
+        return self.model
+
+
+if __name__ == "__main__":
+    model = XGBTrainer().load()
+    model.load()
