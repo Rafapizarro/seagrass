@@ -12,13 +12,17 @@ from pathlib import Path
 from seagrass.ml_logic.model import XGBTrainer
 
 from seagrass.ml_logic.load_data import load_features, load_targets, merge_data
-from seagrass.params import BQ_DATASET, FEATURE_LABELS, GCP_PROJECT, LOCAL_DATA_PATH, TARGET_LABEL
+from seagrass.params import (
+    BQ_DATASET,
+    FEATURE_LABELS,
+    GCP_PROJECT,
+    LOCAL_DATA_PATH,
+    TARGET_LABEL,
+)
 from seagrass.utils import stringify_crs_distance, get_data_size
 
-def preprocess(
-    max_distance=0.01,
-    limit=None
-) -> None:
+
+def preprocess(max_distance=0.01, limit=None) -> None:
     """
     Requests and preprocess the data needed.
 
@@ -48,10 +52,17 @@ def preprocess(
 
     print(f"Merge data with {size_data} data size, CRS : {str_crs_distance} km")
 
-    features_cache_path = os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_features_{size_data}.parquet")
-    targets_cache_path = os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_targets_{size_data}.parquet")
+    features_cache_path = os.path.join(
+        f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_features_{size_data}.parquet"
+    )
+    targets_cache_path = os.path.join(
+        f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_targets_{size_data}.parquet"
+    )
 
-    main_data_cache_path = os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_data_{size_data}_{str_crs_distance}_km.parquet")
+    main_data_cache_path = os.path.join(
+        f"{LOCAL_DATA_PATH}",
+        f"{BQ_DATASET}_data_{size_data}_{str_crs_distance}_km.parquet",
+    )
 
     features = load_features(features_cache_path, limit)
     targets = load_targets(targets_cache_path, limit)
@@ -61,7 +72,7 @@ def preprocess(
         features=features,
         targets=targets,
         max_distance=max_distance,
-        size_data=size_data
+        size_data=size_data,
     )
 
     # Process data
@@ -70,14 +81,14 @@ def preprocess(
 
 
 def train(
-        # TODO : WHICH features the user want
-        max_distance=0.01,
-        limit=None,
-        split_ratio: float = 0.02, # 0.02 represents ~ 1 month of validation data on a 2009-2015 train set
-        learning_rate=0.0005,
-        batch_size = 256,
-        patience = 2
-    ) -> float:
+    # TODO : WHICH features the user want
+    max_distance=0.01,
+    limit=None,
+    split_ratio: float = 0.02,  # 0.02 represents ~ 1 month of validation data on a 2009-2015 train set
+    learning_rate=0.0005,
+    batch_size=256,
+    patience=2,
+) -> float:
     # train data with :
     #   - size of data
     #   - CRS distance
@@ -100,7 +111,9 @@ def train(
     #     ORDER BY pickup_datetime
     # """
 
-    main_data_cache_path = os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_{bq_table}.parquet")
+    main_data_cache_path = os.path.join(
+        f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_{bq_table}.parquet"
+    )
     df = gpd.read_parquet(main_data_cache_path)
 
     # TODO : Fetch preprocess data
@@ -137,11 +150,7 @@ def evaluate(
     model.load()
 
 
-
-
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     # TODO : MAKE THE PIPELINE
     preprocess(max_distance=0.01)
     train(max_distance=0.01)
