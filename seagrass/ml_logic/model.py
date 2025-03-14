@@ -25,7 +25,6 @@ class XGBTrainer:
         else:
             self.model = xgb.XGBClassifier(**params)
 
-
     def fit_model(self, X_train, y_train, X_val, y_val):
         sample_weight = compute_sample_weight(class_weight="balanced", y=y_train)
         self.model.fit(
@@ -39,7 +38,6 @@ class XGBTrainer:
         )
         self.trained = True
         return self
-
 
     def train_eval(self, X_train, y_train, X_val, y_val, X_test, y_test):
         print("Training model...")
@@ -66,7 +64,6 @@ class XGBTrainer:
         print(f"Macro F1 score: {f1:.6f}\n")
 
         return f1
-
 
     def save(self, f1: float):
         self.f1 = f1

@@ -1,44 +1,122 @@
 import os
 import numpy as np
+import os
+
+from numerize import numerize
+from sklearn.model_selection import train_test_split
+
+from seagrass.ml_logic.registry import load_model, save_model
+
 import geopandas as gpd
 from pathlib import Path
 from seagrass.ml_logic.model import XGBTrainer
-from sklearn.model_selection import train_test_split
+
 from seagrass.ml_logic.load_data import load_features, load_targets, merge_data
-from seagrass.params import LOCAL_DATA_PATH, BQ_DATASET, FEATURE_LABELS, TARGET_LABEL
+from seagrass.params import (
+    BQ_DATASET,
+    FEATURE_LABELS,
+    GCP_PROJECT,
+    LOCAL_DATA_PATH,
+    TARGET_LABEL,
+)
+from seagrass.utils import stringify_crs_distance, get_data_size
 
 
-def get_data(merged_data_path, max_distance) -> gpd.GeoDataFrame:
+def preprocess(max_distance=0.01, limit=None) -> None:
     """
-    Requests for all data needed
+    Requests and preprocess the data needed.
+
+    Parameters
+    ----------
+    max_distance : float
+        Maximum distance (in CRS units) allowed between polygons and points for joining.
+        For EEPSG:3035, distance is measured in meters (e.g., 1000 = 1 km).
+    limit : int or None
+        Size of the data requested.
+        If None, fetch all.
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Merged GeoDataFrame resulting from a left spatial join.
     """
-    if Path(merged_data_path).is_file():
-        print("\nLoad merged data from local Parquet file...\n")
-        data = gpd.read_parquet(merged_data_path)
-    else:
-        features = load_features(
-            cache_path=os.path.join(
-                f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_features.parquet"
-            )
-        )
-        target = load_targets(
-            cache_path=os.path.join(
-                f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_target.parquet"
-            )
-        )
-        data = merge_data(
-            cache_path=merged_data_path,
-            features=features,
-            targets=target,
-            max_distance=max_distance,
-        )
+    # Save data with :
+    #   - size of data
+    #   - CRS distance
 
-    return data
+    # Set limit of the data to train
+    size_data = get_data_size(limit)
+
+    # Set CRS distance for the points embedded in the target polygons
+    str_crs_distance = stringify_crs_distance(max_distance)
+
+    print(f"Merge data with {size_data} data size, CRS : {str_crs_distance} km")
+
+    features_cache_path = os.path.join(
+        f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_features_{size_data}.parquet"
+    )
+    targets_cache_path = os.path.join(
+        f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_targets_{size_data}.parquet"
+    )
+
+    main_data_cache_path = os.path.join(
+        f"{LOCAL_DATA_PATH}",
+        f"{BQ_DATASET}_data_{size_data}_{str_crs_distance}_km.parquet",
+    )
+
+    features = load_features(features_cache_path, limit)
+    targets = load_targets(targets_cache_path, limit)
+
+    data_query = merge_data(
+        cache_path=main_data_cache_path,
+        features=features,
+        targets=targets,
+        max_distance=max_distance,
+        size_data=size_data,
+    )
+
+    # Process data
+    # # TODO : clean all data
+    # data_clean = clean_data(data_query)
 
 
-def train():
-    merge_data_path = os.path.join(f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_merged.parquet")
-    df = get_data(merged_data_path=merge_data_path)
+def train(
+    # TODO : WHICH features the user want
+    max_distance=0.01,
+    limit=None,
+    split_ratio: float = 0.02,  # 0.02 represents ~ 1 month of validation data on a 2009-2015 train set
+    learning_rate=0.0005,
+    batch_size=256,
+    patience=2,
+) -> float:
+    # train data with :
+    #   - size of data
+    #   - CRS distance
+
+    # Set limit of the data to train
+    size_data = get_data_size(limit)
+
+    # Set CRS distance for the points embedded in the target polygons
+    str_crs_distance = stringify_crs_distance(max_distance)
+
+    # Selection of the BQ table
+    bq_table = f"data_{size_data}_{str_crs_distance}_km"
+
+    # Selection of the features
+    # TODO : pass into query builders : https://dev.to/chanon-mike/using-python-and-orm-sqlalchemy-with-google-bigquery-4gga
+    # query = f"""
+    #     SELECT *
+    #     FROM `{GCP_PROJECT}`.{BQ_DATASET}.{bq_table}
+    #     WHERE condition
+    #     ORDER BY pickup_datetime
+    # """
+
+    main_data_cache_path = os.path.join(
+        f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_{bq_table}.parquet"
+    )
+    df = gpd.read_parquet(main_data_cache_path)
+
+    # TODO : Fetch preprocess data
     target_map = {
         None: 0,
         "Not reported": 1,
@@ -64,10 +142,17 @@ def train():
     return X_test, y_test
 
 
-def evaluate():
+def evaluate(
+    max_distance=0.01,
+    limit=None,
+):
     model = XGBTrainer()
     model.load()
 
 
 if __name__ == "__main__":
-    train()
+    # TODO : MAKE THE PIPELINE
+    preprocess(max_distance=0.01)
+    train(max_distance=0.01)
+    # evaluate(max_distance=0.01)
+    # pred()
