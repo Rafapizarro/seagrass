@@ -54,6 +54,7 @@ def train_test_val_split(merge_df: pd.DataFrame):
     )
     y = merge_df["FAMILY"].map(
         {
+            None: 0,
             np.nan: 0,
             "Not reported": 1,
             "Posidoniaceae": 2,
