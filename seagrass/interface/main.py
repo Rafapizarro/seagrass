@@ -115,34 +115,34 @@ def train(
     main_data_cache_path = os.path.join(
         f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_{bq_table}.parquet"
     )
-    # df = gpd.read_parquet(main_data_cache_path)
+    df = gpd.read_parquet(main_data_cache_path)
 
     # TODO : Fetch preprocess data
-    # target_map = {
-    #     None: 0,
-    #     "Not reported": 1,
-    #     "Posidoniaceae": 2,
-    #     "Cymodoceaceae": 3,
-    #     "Hydrocharitaceae": 4,
-    # }
-    # X = df[FEATURE_LABELS]
-    # y = df[TARGET_LABEL].map(target_map)
-    # X_train, X_test, y_train, y_test = train_test_split(
-    #     X, y, test_size=0.2, stratify=y, random_state=42
-    # )
-    # X_train, X_val, y_train, y_val = train_test_split(
-    #     X_train, y_train, test_size=0.25, stratify=y_train, random_state=42
-    # )
+    target_map = {
+        None: 0,
+        "Not reported": 1,
+        "Posidoniaceae": 2,
+        "Cymodoceaceae": 3,
+        "Hydrocharitaceae": 4,
+    }
+    X = df[FEATURE_LABELS]
+    y = df[TARGET_LABEL].map(target_map)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, stratify=y, random_state=42
+    )
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_train, y_train, test_size=0.25, stratify=y_train, random_state=42
+    )
 
-    # X_train, X_val, X_test, y_train, y_val, y_test = train_test_val_split(df)
+    X_train, X_val, X_test, y_train, y_val, y_test = train_test_val_split(df)
 
-    # model = XGBTrainer()
+    model = XGBTrainer()
 
-    # f1 = model.train_eval(X_train, y_train, X_val, y_val)
+    f1 = model.train_eval(X_train, y_train, X_val, y_val)
 
-    # model.save(f1)
+    model.save(f1)
 
-    # return X_test, y_test
+    return X_test, y_test
 
 
 def evaluate(

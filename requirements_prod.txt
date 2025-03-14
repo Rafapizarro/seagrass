@@ -13,6 +13,7 @@ protobuf==3.19.6
 h5py==3.10.0
 db-dtypes
 shapely
+pytest
 
 #Models used
 geopandas
