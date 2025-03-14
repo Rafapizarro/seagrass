@@ -1,16 +1,18 @@
+import os
 import numpy as np
 import os
 
 from numerize import numerize
+from sklearn.model_selection import train_test_split
 
 from seagrass.ml_logic.registry import load_model, save_model
 
+import geopandas as gpd
 from pathlib import Path
-import pandas as pd
-from colorama import Fore, Style
+from seagrass.ml_logic.model import XGBTrainer
 
 from seagrass.ml_logic.load_data import load_features, load_targets, merge_data
-from seagrass.params import BQ_DATASET, GCP_PROJECT, LOCAL_DATA_PATH
+from seagrass.params import BQ_DATASET, FEATURE_LABELS, GCP_PROJECT, LOCAL_DATA_PATH, TARGET_LABEL
 from seagrass.utils import stringify_crs_distance, get_data_size
 
 def preprocess(
@@ -34,7 +36,7 @@ def preprocess(
     gpd.GeoDataFrame
         Merged GeoDataFrame resulting from a left spatial join.
     """
-    # TODO : save data with :
+    # Save data with :
     #   - size of data
     #   - CRS distance
 
@@ -76,7 +78,7 @@ def train(
         batch_size = 256,
         patience = 2
     ) -> float:
-    # TODO : train data with :
+    # train data with :
     #   - size of data
     #   - CRS distance
 
@@ -91,88 +93,57 @@ def train(
 
     # Selection of the features
     # TODO : pass into query builders : https://dev.to/chanon-mike/using-python-and-orm-sqlalchemy-with-google-bigquery-4gga
-    query = f"""
-        SELECT *
-        FROM `{GCP_PROJECT}`.{BQ_DATASET}.{bq_table}
-        WHERE condition
-        ORDER BY pickup_datetime
-    """
+    # query = f"""
+    #     SELECT *
+    #     FROM `{GCP_PROJECT}`.{BQ_DATASET}.{bq_table}
+    #     WHERE condition
+    #     ORDER BY pickup_datetime
+    # """
+
+    main_data_cache_path = os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_{bq_table}.parquet")
+    df = gpd.read_parquet(main_data_cache_path)
+
     # TODO : Fetch preprocess data
+    target_map = {
+        None: 0,
+        "Not reported": 1,
+        "Posidoniaceae": 2,
+        "Cymodoceaceae": 3,
+        "Hydrocharitaceae": 4,
+    }
+    X = df[FEATURE_LABELS]
+    y = df[TARGET_LABEL].map(target_map)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, stratify=y, random_state=42
+    )
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_train, y_train, test_size=0.25, stratify=y_train, random_state=42
+    )
 
-    # TODO : Split the data (train, val ?, test ?)
+    model = XGBTrainer()
 
-    model = load_model()
+    f1 = model.train(X_train, y_train, X_val, y_val)
 
-    # TODO : Init model (+ compile if needed)
+    model.save(f1)
 
-    # TODO : Train model
+    return X_test, y_test
 
-    # TODO : Save the results : locally / distant
-    # save_results(params=params, metrics=dict(mae=val_mae))
-
-    # Save model weight on the hard drive (and optionally on GCS too!)
-    save_model(model=model)
-
-    return
 
 def evaluate(
-        # TODO : WHICH features we evaluate
-        max_distance=0.01,
-        limit=None,
-        stage: str = "Production"
-    ) -> float:
-    """
-    Evaluate the performance of the latest production model on processed data
-    Return METRICS
-    """
-    # TODO : evaluate data with :
-    #   - size of data
-    #   - CRS distance
+    max_distance=0.01,
+    limit=None,
+):
+    model = XGBTrainer()
+    model.load()
 
-    # Set limit of the data to train
-    size_data = get_data_size(limit)
 
-    # Set CRS distance for the points embedded in the target polygons
-    crs_distance = stringify_crs_distance(max_distance)
 
-    # Selection of the BQ table
-    bq_table = f"data_{size_data}_{crs_distance}_km"
 
-    print(Fore.MAGENTA + "\n⭐️ Use case: evaluate" + Style.RESET_ALL)
 
-    # TODO : check if we can loed models
-    model = load_model(stage=stage)
-    assert model is not None
-
-    # TODO : handle the features
-    # Query your BigQuery processed table and get data_processed using `get_data_with_cache`
-    query = f"""
-        SELECT *
-        FROM `{GCP_PROJECT}`.{BQ_DATASET}.{bq_table}
-        WHERE condition
-        ORDER BY pickup_datetime
-    """
-
-    return
-
-def pred(X_pred: pd.DataFrame = None) -> np.ndarray:
-    print("\n⭐️ Use case: predict")
-
-    if X_pred is None:
-        X_pred = pd.DataFrame(dict(
-        # TODO : insert the fetures from users
-    ))
-
-    model = load_model()
-    assert model is not None
-
-    # TODO : preprocess and make predictions
-
-    return
 
 if __name__ == '__main__':
     # TODO : MAKE THE PIPELINE
-    preprocess(max_distance=0.01, limit=10000)
-    train(max_distance=0.01, limit=10000)
-    # evaluate(max_distance=0.01, limit=10000)
+    preprocess(max_distance=0.01)
+    train(max_distance=0.01)
+    # evaluate(max_distance=0.01)
     # pred()
