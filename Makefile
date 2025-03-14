@@ -23,3 +23,18 @@ pylint:
 
 pytest:
     PYTHONDONTWRITEBYTECODE=1 pytest -v --color=yes
+
+
+################# LOCAL FILES ################################################
+
+ML_DIR=~/.seagrass/mlops
+
+reset_local_files:
+	rm -rf ${ML_DIR}
+	mkdir -p ~/.seagrass/mlops/data/
+	mkdir ~/.seagrass/mlops/data/raw
+	mkdir ~/.seagrass/mlops/data/processed
+	mkdir ~/.seagrass/mlops/training_outputs
+	mkdir ~/.seagrass/mlops/training_outputs/metrics
+	mkdir ~/.seagrass/mlops/training_outputs/models
+	mkdir ~/.seagrass/mlops/training_outputs/params
