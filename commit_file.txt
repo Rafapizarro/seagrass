@@ -1,0 +1,66 @@
+commit 4adc7b1295b47010a5368c2c868719aebcd2d187
+Author: RAFAEL LOPEZ PIZARRO <RAFA.LOPEZ.PIZARRO@GMAIL.COM>
+Date:   Fri Mar 14 14:17:17 2025 +0100
+
+    train_test_val_split and model train_eval unfinished
+
+diff --git a/.gitignore b/.gitignore
+index 8ba0fda..4d1dccd 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -5,6 +5,9 @@ __pycache__/
+ *.json
+ *.csv
+ 
++#folders
++/data
++
+ # C extensions
+ *.so
+ 
+commit eb9e8d51ea108ad9519504e529eb753f5f36d9f8
+Author: RAFAEL LOPEZ PIZARRO <RAFA.LOPEZ.PIZARRO@GMAIL.COM>
+Date:   Fri Mar 14 14:11:49 2025 +0100
+
+    train_test_val_split and model train_eval unfinished
+
+diff --git a/seagrass/ml_logic/model.py b/seagrass/ml_logic/model.py
+index ab1bf14..174898f 100644
+--- a/seagrass/ml_logic/model.py
++++ b/seagrass/ml_logic/model.py
+@@ -22,6 +22,20 @@ class XGBTrainer:
+             random_state=42,
+         )
+ 
++
++    def fit_model(self, X_train, y_train, X_val, y_val):
++        sample_weight = compute_sample_weight(class_weight="balanced", y=y_train)
++        self.model.fit(
++            X_train,
++            y_train,
++            sample_weight=sample_weight,
++            eval_set=[(X_val, y_val)],
++            verbose=False,
++        )
++        self.trained = True
++        return self
++
++
+     def train_eval(self, X_train, y_train, X_val, y_val, X_test, y_test):
+         print("Training model...\n")
+ 
+commit 5596e73b9bfb266b3842b0766698e92ea2b3f339
+Merge: 4faa9a9 73b98c1
+Author: RAFAEL LOPEZ PIZARRO <RAFA.LOPEZ.PIZARRO@GMAIL.COM>
+Date:   Fri Mar 14 11:02:07 2025 +0100
+
+    models with distances unfinished
+
+diff --cc data/merged_features.parquet
+index 0000000,0000000..386d9cf
+new file mode 100644
+Binary files differ
+diff --cc data/seagrass_targets.parquet
+index 0000000,0000000..0887f40
+new file mode 100644
+Binary files differ

@@ -5,9 +5,11 @@ from google.cloud import storage
 
 from colorama import Fore, Style
 
+
 def save_results(params: dict, metrics: dict) -> None:
     # TODO : id required, save the metrics, parmas results into local/distant files
     return
+
 
 def save_model(model: keras.Model = None) -> None:
     """
@@ -50,7 +52,9 @@ def load_model(stage="Production") -> keras.Model:
 
         try:
             latest_blob = max(blobs, key=lambda x: x.updated)
-            latest_model_path_to_save = os.path.join(LOCAL_REGISTRY_PATH, latest_blob.name)
+            latest_model_path_to_save = os.path.join(
+                LOCAL_REGISTRY_PATH, latest_blob.name
+            )
             latest_blob.download_to_filename(latest_model_path_to_save)
 
             latest_model = keras.models.load_model(latest_model_path_to_save)

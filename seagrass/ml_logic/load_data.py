@@ -9,9 +9,8 @@ from google.cloud import bigquery
 
 from seagrass.utils import stringify_crs_distance
 
-def load_features(
-    cache_path:Path,
-    limit=None) -> gpd.GeoDataFrame:
+
+def load_features(cache_path: Path, limit=None) -> gpd.GeoDataFrame:
     """
     Load features data from local cache or BigQuery.
 
@@ -44,14 +43,14 @@ def load_features(
         data = client.query(query).to_dataframe()
         data.to_parquet(cache_path)
 
-    gdf = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.lon, data.lat), crs="EPSG:4326")
+    gdf = gpd.GeoDataFrame(
+        data, geometry=gpd.points_from_xy(data.lon, data.lat), crs="EPSG:32633"
+    )
 
     return gdf
 
 
-def load_targets(
-    cache_path:Path,
-    limit=None) -> gpd.GeoDataFrame:
+def load_targets(cache_path: Path, limit=None) -> gpd.GeoDataFrame:
     """
     Load target data from local cache or BigQuery.
 
@@ -65,7 +64,7 @@ def load_targets(
     Returns
     -------
     GeoDataFrame
-        Target data with CRS set to EPSG:4326.
+        Target data with CRS set to EPSG:32633.
     """
 
     if Path(cache_path).is_file():
@@ -85,14 +84,15 @@ def load_targets(
         data.to_parquet(cache_path)
 
     data["coordinates"] = data["coordinates"].apply(wkt.loads)
-    gdf = gpd.GeoDataFrame(data, geometry="coordinates", crs="EPSG:4326")
+    gdf = gpd.GeoDataFrame(data, geometry="coordinates", crs="EPSG:32633")
 
     return gdf
+
 
 def merge_data(
     features: gpd.GeoDataFrame,
     targets: gpd.GeoDataFrame,
-    cache_path:Path,
+    cache_path: Path,
     size_data="all",
     max_distance=0.01,
 ) -> gpd.GeoDataFrame:
@@ -102,13 +102,9 @@ def merge_data(
     Parameters
     ----------
     features : gpd.GeoDataFrame
-        Feature data with CRS set to EEPSG:3035.
+        Feature data with CRS set to EPSG:32633.
     targets : gpd.GeoDataFrame
-        Target data with CRS set to EEPSG:3035.
-    cache_path: Path
-        Patg to the local files.
-    size_data: str
-        Size if the data.
+        Target data with CRS set to EPSG:32633.
     max_distance : float
         Maximum distance (in CRS units) allowed between polygons and points for joining.
         For EEPSG:3035, distance is measured in meters (e.g., 0.01 degrees = ~1 km).
@@ -123,10 +119,9 @@ def merge_data(
         df = pd.read_parquet(cache_path)
 
     else:
-
         print("\nMerging files...")
-        df = gpd.sjoin_nearest(features, targets, how="left",max_distance=max_distance)
-        df['geometry'] = df['geometry'].apply(wkt.dumps)
+        df = gpd.sjoin_nearest(features, targets, how="left", max_distance=max_distance)
+        df["geometry"] = df["geometry"].apply(wkt.dumps)
 
         # Save all main data to local files
         df.to_parquet(cache_path)
@@ -139,14 +134,15 @@ def merge_data(
             df,
             gcp_project=GCP_PROJECT,
             bq_dataset=BQ_DATASET,
-            table=f'data_{size_data}_{crs_distance}_km',
-            truncate=True
+            table=f"data_{size_data}_{crs_distance}_km",
+            truncate=True,
         )
         print("\nFiles merged!")
 
     return df
 
+
 # if __name__ == "__main__":
-    # features = load_features(cache_path=os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_features.parquet"))
-    # targets = load_targets(cache_path=os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_targets.parquet"))
-    # df = merge_data(cache_path=os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_features.parquet"), features,targets)
+# features = load_features(cache_path=os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_features.parquet"))
+# targets = load_targets(cache_path=os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_targets.parquet"))
+# df = merge_data(cache_path=os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_features.parquet"), features,targets)
