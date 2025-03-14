@@ -5,7 +5,7 @@ run_preprocess:
 	python -c 'from seagrass.interface.main import preprocess; preprocess(max_distance=0.01, limit=1000)'
 
 run_train:
-	python -c 'from seagrass.interface.main import train; train()'
+	python -c 'from seagrass.interface.main import train; train(max_distance=0.01, limit=1000)'
 
 run_pred:
 	python -c 'from seagrass.interface.main import pred; pred()'

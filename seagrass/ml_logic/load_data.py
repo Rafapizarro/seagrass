@@ -117,6 +117,7 @@ def merge_data(
     if Path(cache_path).is_file():
         print("\nLoad data from local Parquet file...")
         df = pd.read_parquet(cache_path)
+        df["geometry"] = df["geometry"].apply(wkt.dumps)
 
     else:
         print("\nMerging files...")
