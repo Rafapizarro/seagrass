@@ -6,6 +6,7 @@ from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+# load the model into the state
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,6 +20,15 @@ app.add_middleware(
 @app.get("/predict")
 # http://localhost:8000/predict?latitudes=40,41&longitudes=-1,0
 def get_seagrass_prediction(latitudes: str, longitudes: str):
+    # load the model from the state
+
+    #create random placeholder values
+
+    # create df from random placeholder values
+
+    # predict probabilities with loaded model
+
+    #return probabilities
     latitudes = latitudes.split(",")
     longitudes = longitudes.split(",")
 

@@ -59,3 +59,4 @@ pandas_gbq
 numerize
 
 xgboost
+hdbscan
