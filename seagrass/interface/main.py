@@ -1,145 +1,73 @@
+import os
 import numpy as np
-
-from seagrass_api.ml_logic.data import clean_data, get_data_with_cache, load_data_to_bq
-from seagrass_api.ml_logic.registry import load_model, save_model
-from seagrass_api.params import *
-
+import geopandas as gpd
 from pathlib import Path
-import pandas as pd
-from colorama import Fore, Style
+from seagrass.ml_logic.model import XGBTrainer
+from sklearn.model_selection import train_test_split
+from seagrass.ml_logic.load_data import load_features, load_targets, merge_data
+from seagrass.params import LOCAL_DATA_PATH, BQ_DATASET, FEATURE_LABELS, TARGET_LABEL
 
-def preprocess(
-    # TODO : WHICH features we preprocess
-    min_date='2022-01-01', max_date='2023-01-01',
-    features: list=[]
-) -> None:
+
+def get_data(merged_data_path) -> gpd.GeoDataFrame:
     """
     Requests for all data needed
     """
-    all_data = {}
+    if Path(merged_data_path).is_file():
+        print("\nLoad merged data from local Parquet file...\n")
+        data = gpd.read_parquet(merged_data_path)
+    else:
+        features = load_features(
+            cache_path=os.path.join(
+                f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_features.parquet"
+            )
+        )
+        target = load_targets(
+            cache_path=os.path.join(
+                f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_target.parquet"
+            )
+        )
+        data = merge_data(
+            cache_path=merged_data_path,
+            features=features,
+            targets=target,
+            max_distance=0.01,
+        )
+
+    return data
 
 
-    # Selection of the features
-    # TODO : pass into query builders : https://dev.to/chanon-mike/using-python-and-orm-sqlalchemy-with-google-bigquery-4gga
-    query = f"""
-        SELECT *
-        FROM `{GCP_PROJECT}`.{BQ_DATASET}.seagrass_global_target
-    """
-
-
-    # Retrieve data using `get_data_with_cache`
-    # TODO : save data with specific features
-    # data_query_cache_path = Path(LOCAL_DATA_PATH).joinpath("raw", f"query_{features}_{DATA_SIZE}.csv")
-    data_query = get_data_with_cache(
-        query=query,
-        gcp_project=GCP_PROJECT,
-        # cache_path=data_query_cache_path,
-        data_has_header=True
+def train():
+    merge_data_path = os.path.join(f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_merged.parquet")
+    df = get_data(merged_data_path=merge_data_path)
+    target_map = {
+        None: 0,
+        "Not reported": 1,
+        "Posidoniaceae": 2,
+        "Cymodoceaceae": 3,
+        "Hydrocharitaceae": 4,
+    }
+    X = df[FEATURE_LABELS]
+    y = df[TARGET_LABEL].map(target_map)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, stratify=y, random_state=42
+    )
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_train, y_train, test_size=0.25, stratify=y_train, random_state=42
     )
 
+    model = XGBTrainer()
 
-    # Process data
-    # TODO : clean all data
-    data_clean = clean_data(data_query)
+    f1 = model.train(X_train, y_train, X_val, y_val)
 
-    # TODO : ALL PREPROCESS STEPS
-    # TODO : split ?
-    # TODO : preprocess_features(X)
-    data_processed = pd.DataFrame([])
+    model.save(f1)
 
-    # TODO : load data preprocessed into BigQuery
-    load_data_to_bq(
-        data_processed,
-        gcp_project=GCP_PROJECT,
-        bq_dataset=BQ_DATASET,
-        table=f'processed_{DATA_SIZE}',
-        truncate=True
-    )
+    return X_test, y_test
 
 
-def train(
-        # TODO : WHICH features the user want
-        features: list=[],
-        split_ratio: float = 0.02, # 0.02 represents ~ 1 month of validation data on a 2009-2015 train set
-        learning_rate=0.0005,
-        batch_size = 256,
-        patience = 2
-    ) -> float:
-    # TODO : TO CHANGE IF WE WANT ANOTHER TABLE
-    table_name = "seagrass"
+def evaluate():
+    model = XGBTrainer()
+    model.load()
 
-    # Selection of the BQ table
-    bq_table = TABLE_NAMES[table_name]
 
-    # Selection of the features
-    # TODO : pass into query builders : https://dev.to/chanon-mike/using-python-and-orm-sqlalchemy-with-google-bigquery-4gga
-    query = f"""
-        SELECT *
-        FROM `{GCP_PROJECT}`.{BQ_DATASET}.{bq_table}_{DATA_SIZE}
-        WHERE condition
-        ORDER BY pickup_datetime
-    """
-    # TODO : Fetch preprocess data
-
-    # TODO : Split the data (train, val ?, test ?)
-
-    model = load_model()
-
-    # TODO : Init model (+ compile if needed)
-
-    # TODO : Train model
-
-    # TODO : Save the results : locally / distant
-    # save_results(params=params, metrics=dict(mae=val_mae))
-
-    # Save model weight on the hard drive (and optionally on GCS too!)
-    save_model(model=model)
-
-    return
-
-def evaluate(
-        # TODO : WHICH features we evaluate
-        features: list=[],
-        stage: str = "Production"
-    ) -> float:
-    """
-    Evaluate the performance of the latest production model on processed data
-    Return METRICS
-    """
-    print(Fore.MAGENTA + "\n⭐️ Use case: evaluate" + Style.RESET_ALL)
-
-    # TODO : check if we can loed models
-    model = load_model(stage=stage)
-    assert model is not None
-
-    # TODO : handle the features
-    # Query your BigQuery processed table and get data_processed using `get_data_with_cache`
-    query = f"""
-        SELECT * EXCEPT(_0)
-        FROM `{GCP_PROJECT}`.{BQ_DATASET}.processed_{DATA_SIZE}
-        WHERE {features}'
-    """
-
-    return
-
-def pred(X_pred: pd.DataFrame = None) -> np.ndarray:
-    print("\n⭐️ Use case: predict")
-
-    if X_pred is None:
-        X_pred = pd.DataFrame(dict(
-        # TODO : insert the fetures from users
-    ))
-
-    model = load_model()
-    assert model is not None
-
-    # TODO : preprocess and make predictions
-
-    return
-
-if __name__ == '__main__':
-    # TODO : MAKE THE PIPELINE
-    preprocess(min_date='2009-01-01', max_date='2015-01-01')
+if __name__ == "__main__":
     train()
-    evaluate()
-    pred()
