@@ -46,7 +46,7 @@ class XGBTrainer:
         f1 = f1_score(y_test, y_pred, average="macro")
         print(f"\nMacro F1 score: {f1:.6f}\n")
 
-        return print(f"\nMacro F1 score: {f1:.6f}\n")
+        return f1
 
     def save(self, f1: float):
         """Save the trained model with an F1-score-based filename"""
