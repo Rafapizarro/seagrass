@@ -64,10 +64,10 @@ def train():
     return X_test, y_test
 
 
-def evaluate():
+def load_model():
     model = XGBTrainer()
     model.load()
 
 
 if __name__ == "__main__":
-    train()
+    load_model()
