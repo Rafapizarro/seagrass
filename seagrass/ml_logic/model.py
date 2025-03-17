@@ -27,25 +27,18 @@ class XGBTrainer:
         self.trained = False
         self.model_path = os.path.join(LOCAL_REGISTRY_PATH, "models", "xgb.ubj")
 
-    def train_test(self, X_train, y_train, X_val, y_val, X_test, y_test):
-        print("\nTraining model...\n")
-
     def fit_model(self, X_train, y_train, X_val, y_val):
-        sample_weight = compute_sample_weight(class_weight="balanced", y=y_train)
         self.model.fit(
             X_train,
             y_train,
-            sample_weight=sample_weight,
             eval_set=[(X_val, y_val)],
             verbose=False,
         )
         self.trained = True
-        return self
+        return self.model
 
     def train_eval(self, X_train, y_train, X_val, y_val, X_test, y_test):
         print("Training model...\n")
-
-        sample_weight = compute_sample_weight(class_weight="balanced", y=y_train)
 
         self.model.fit(
             X_train,
@@ -63,11 +56,10 @@ class XGBTrainer:
 
         f1 = f1_score(y_test, y_pred, average="macro")
         print(f"\nMacro F1 score: {f1:.6f}\n")
-        f1 = f1_score(y_test, y_pred, average="macro")
         class_report = classification_report(y_test, y_pred)
         print(class_report)
 
-        return print(f"\nMacro F1 score: {f1:.6f}\n")
+        return f1
 
     def save(self, f1: float):
         """Save the trained model with an F1-score-based filename"""
