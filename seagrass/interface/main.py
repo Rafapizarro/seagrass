@@ -4,6 +4,7 @@ import os
 
 from sklearn.model_selection import train_test_split
 
+from seagrass.ml_logic.preprocessor import train_test_val_split
 from seagrass.ml_logic.registry import load_model, save_model
 
 import geopandas as gpd
@@ -132,9 +133,11 @@ def train(
         X_train, y_train, test_size=0.25, stratify=y_train, random_state=42
     )
 
+    X_train, X_val, X_test, y_train, y_val, y_test = train_test_val_split(df)
+
     model = XGBTrainer()
 
-    f1 = model.train(X_train, y_train, X_val, y_val)
+    f1 = model.train_eval(X_train, y_train, X_val, y_val)
 
     model.save(f1)
 
