@@ -5,6 +5,11 @@ import uvicorn
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+import supabase
+
+from seagrass.params import *
+
+from seagrass.api.connexion import DBConnexion
 from seagrass.ml_logic.model import XGBTrainer
 
 app = FastAPI()
@@ -21,35 +26,64 @@ app.add_middleware(
 
 
 @app.get("/predict")
-# http://localhost:8000/predict?latitudes=40,41&longitudes=-1,0
-def get_seagrass_prediction(latitudes: float, longitudes: float):
+# http://localhost:8000/predict?latitudes=32.8125+32.9999&longitudes=13.8333+13.9999
+def get_seagrass_prediction(latitudes: str, longitudes: str):
     # load the model from the state
     xgb_model = app.state.model
 
-    # create random placeholder values
-    res = {
-        "lat": latitudes,
-        "lon": longitudes,
-        "po4": 0.024890,
-        "no3": 0.100141,
-        "si": 4.213321,
-        "nh4": 0.037484,
-        "bottom_temp": 12.952122,
-        "chlorophyll": -0.453486,
-        "avg_temp": 19.954823,
-        "salinity": 37.309742,
-        "depth": -0.422800,
-    }
+    lats = latitudes.split(" ")
+    longs = longitudes.split(" ")
 
-    # create df from random placeholder values
-    df = pd.DataFrame([res])
+    db_client = DBConnexion().get_connexion()
 
-    # predict probabilities with loaded model
-    probs = xgb_model.predict_proba(df)
-    probs = [float(p) for p in probs[0]]
-    # return probabilities
-    # latitudes = latitudes.split(",")
-    # longitudes = longitudes.split(",")
+    # result = (
+    #     db_client.table("seagrass_features")
+    #     .select("*")
+    #     .eq("latitude", latitudes)
+    #     .eq("longitude", longitudes)
+    #     .execute()
+    # )
+    result = (
+        db_client.table("seagrass_features")
+        .select("*")
+        .gt("latitude", float(lats[0]))
+        .lt("latitude", float(lats[1]))
+        .gt("longitude", float(longs[0]))
+        .lt("longitude", float(longs[1]))
+        .execute()
+    )
+    # return result.data
 
-    # Test return from API
-    return {"pred": probs}
+    def get_all_pred_points(data):
+        # create values
+        res = {
+            "lat": data["latitude"],
+            "lon": data["longitude"],
+            "po4": data["po4"],
+            "no3": data["no3"],
+            "si": data["si"],
+            "nh4": data["nh4"],
+            "bottom_temp": data["bottomT"],
+            "chlorophyll": data["trend"],
+            "avg_temp": data["thetao"],
+            "salinity": data["so"],
+            "depth": data["depth"],
+        }
+
+        # create df from values
+        df = pd.DataFrame([res], columns=res.keys())
+
+        # predict probabilities with loaded model
+        probs = xgb_model.predict_proba(df)
+        probs = {
+            "coordinates": f"{data['latitude']}, {data['longitude']}",
+            "targets": [float(p) for p in probs[0]],
+        }
+        # return probabilities
+
+        return probs
+
+    points_probs = [get_all_pred_points(p) for idx, p in enumerate(result.data)]
+
+    # # Test return from API
+    return {"preds": points_probs}

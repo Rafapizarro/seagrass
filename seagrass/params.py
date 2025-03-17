@@ -19,6 +19,9 @@ os.makedirs(LOCAL_DATA_PATH, exist_ok=True)
 os.makedirs(LOCAL_REGISTRY_PATH, exist_ok=True)
 
 ##################  DATABASE  #####################
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
 FEATURE_LABELS = [
     "lat",
     "lon",
@@ -46,6 +49,8 @@ FEATURE_LABELS = [
     "salinity",
 ]
 TARGET_LABEL = ["family"]
+
+CLASSES = ["No grass"]
 
 ################## VALIDATIONS #################
 
