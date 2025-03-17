@@ -40,7 +40,7 @@ class XGBTrainer:
         return self
 
     def train_eval(self, X_train, y_train, X_val, y_val, X_test, y_test):
-        print("Training model...")
+        # print("Training model...")
 
         sample_weight = compute_sample_weight(class_weight="balanced", y=y_train)
 
@@ -52,7 +52,7 @@ class XGBTrainer:
             verbose=0,
         )
         self.trained = True
-        print("Training complete.\n")
+        # print("Training complete.\n")
 
         y_pred_proba = self.model.predict_proba(X_test)
         y_pred = y_pred_proba.argmax(axis=1)
@@ -61,7 +61,7 @@ class XGBTrainer:
         # class_report = classification_report(y_test, y_pred)
         # print(class_report)
 
-        print(f"Macro F1 score: {f1:.6f}\n")
+        # print(f"Macro F1 score: {f1:.6f}\n")
 
         return f1
 

@@ -94,7 +94,7 @@ def merge_data(
     targets: gpd.GeoDataFrame,
     cache_path: Path,
     size_data="all",
-    max_distance=0.01,
+    max_distance=0.001,
 ) -> gpd.GeoDataFrame:
     """
     Merge feature and target GeoDataFrames using a spatial nearest join.
