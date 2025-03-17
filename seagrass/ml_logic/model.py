@@ -7,7 +7,6 @@ import xgboost as xgb
 from pathlib import Path
 from sklearn.metrics import f1_score, classification_report
 from seagrass.params import LOCAL_REGISTRY_PATH
-from sklearn.utils.class_weight import compute_sample_weight
 
 
 class XGBTrainer:
@@ -28,8 +27,18 @@ class XGBTrainer:
         self.trained = False
         self.model_path = os.path.join(LOCAL_REGISTRY_PATH, "models", "xgb.ubj")
 
-    def train_test(self, X_train, y_train, X_val, y_val, X_test, y_test):
-        print("\nTraining model...\n")
+    def fit_model(self, X_train, y_train, X_val, y_val):
+        self.model.fit(
+            X_train,
+            y_train,
+            eval_set=[(X_val, y_val)],
+            verbose=False,
+        )
+        self.trained = True
+        return self.model
+
+    def train_eval(self, X_train, y_train, X_val, y_val, X_test, y_test):
+        print("Training model...\n")
 
         self.model.fit(
             X_train,
@@ -42,43 +51,43 @@ class XGBTrainer:
         print("Training complete.\n")
 
         y_pred = self.model.predict(X_test)
+        y_pred_proba = self.model.predict_proba(X_test)
+        y_pred = y_pred_proba.argmax(axis=1)
 
         f1 = f1_score(y_test, y_pred, average="macro")
         print(f"\nMacro F1 score: {f1:.6f}\n")
+        class_report = classification_report(y_test, y_pred)
+        print(class_report)
 
         return f1
 
     def save(self, f1: float):
         """Save the trained model with an F1-score-based filename"""
         if not self.trained:
-            raise ValueError("\n❌ Error: Model must be trained before saving.\n")
+            raise ValueError("\nError: Model must be trained before saving.\n")
 
         model_dir = os.path.join(LOCAL_REGISTRY_PATH, "models")
-        os.makedirs(model_dir, exist_ok=True)  # Ensure directory exists
+        os.makedirs(model_dir, exist_ok=True)
 
-        # Save model with F1 score in filename
         model_path = os.path.join(model_dir, f"{float(f1):.3f}_xgb.ubj")
         self.model.save_model(model_path)
-        print(f"\n✅ Model saved at: {model_path}\n")
+        print(f"\nModel saved as {model_path}\n")
 
     def load(self):
         """Load the most recent saved model automatically"""
         model_dir = os.path.join(LOCAL_REGISTRY_PATH, "models")
 
-        # Find all saved models
         model_files = list(Path(model_dir).glob("*.ubj"))
 
         if not model_files:
             raise FileNotFoundError(
-                "\n❌ No saved models found! Train and save a model first.\n"
+                "\nNo saved models found. Train and save the model first.\n"
             )
 
-        # Sort files by most recent (assuming names include scores like '0.853_xgb.ubj')
         latest_model = max(model_files, key=os.path.getctime)
 
-        # Load the latest model
         self.model.load_model(str(latest_model))
-        print(f"\n✅ Loaded model: {latest_model}\n")
+        print(f"\nLoaded model: {latest_model}\n")
 
         return self.model
 
@@ -110,7 +119,7 @@ class Clusterer:
 
     def save(self, filename=None):
         if not self.trained:
-            raise ValueError("\n❌ Error: Model must be trained before saving.\n")
+            raise ValueError("\nError: Model must be trained before saving.\n")
 
         model_dir = os.path.join(LOCAL_REGISTRY_PATH, "models")
         os.makedirs(model_dir, exist_ok=True)
@@ -124,25 +133,25 @@ class Clusterer:
         joblib.dump(self.model, filename)
         self.saved = True
 
-        print(f"✅ Model saved as {filename}")
+        print(f"Model saved as {filename}")
 
     def load(self, path=None):
         model_dir = os.path.join(LOCAL_REGISTRY_PATH, "models")
+        os.makedirs(model_dir, exist_ok=True)
 
-        # If no path is provided, find the latest saved model
         if path is None:
             model_files = glob.glob(os.path.join(model_dir, "hdbscan_*.pkl"))
             if not model_files:
-                raise ValueError("\n❌ Error: No saved models found.\n")
-            path = max(model_files, key=os.path.getctime)  # Load most recent model
+                raise ValueError("\nError: No saved models found.\n")
+            path = max(model_files, key=os.path.getctime)
 
         if not os.path.isfile(path):
-            raise ValueError(f"\n❌ Error: Model file {path} does not exist.\n")
+            raise ValueError(f"\nError: Model file {path} does not exist.\n")
 
         self.model = joblib.load(path)
         self.trained = True
         self.saved = True
-        print(f"✅ Model loaded from {path}")
+        print(f"Model loaded from {path}")
 
         return self.model
 

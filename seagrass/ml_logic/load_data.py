@@ -24,15 +24,15 @@ def load_features(cache_path: Path, limit=None) -> gpd.GeoDataFrame:
     Returns
     -------
     GeoDataFrame
-        Features data with CRS set to EPSG:4326.
+        Features data with CRS set to EPSG:32633.
     """
 
     if Path(cache_path).is_file():
-        print("\nLoad data from local Parquet file...")
+        print("\nLoad feature data from local Parquet file...")
         data = pd.read_parquet(cache_path)
 
     else:
-        print("\nLoad data from BigQuery server...")
+        print("\nLoad feature data from BigQuery server...")
         client = bigquery.Client()
         query = f"""
         SELECT *
@@ -68,11 +68,11 @@ def load_targets(cache_path: Path, limit=None) -> gpd.GeoDataFrame:
     """
 
     if Path(cache_path).is_file():
-        print("\nLoad data from local Parquet file...")
+        print("\nLoad target data from local Parquet file...\n")
         data = pd.read_parquet(cache_path)
 
     else:
-        print("\nLoad data from BigQuery server...")
+        print("\nLoad target data from BigQuery server...\n")
         client = bigquery.Client()
         query = f"""
         SELECT *
@@ -90,6 +90,7 @@ def load_targets(cache_path: Path, limit=None) -> gpd.GeoDataFrame:
 
 
 def merge_data(
+    cache_path: Path,
     features: gpd.GeoDataFrame,
     targets: gpd.GeoDataFrame,
     cache_path: Path,
@@ -107,7 +108,7 @@ def merge_data(
         Target data with CRS set to EPSG:32633.
     max_distance : float
         Maximum distance (in CRS units) allowed between polygons and points for joining.
-        For EEPSG:3035, distance is measured in meters (e.g., 0.01 degrees = ~1 km).
+        For EPSG:32633, distance is measured in meters (e.g., 0.01 degrees = ~1 km).
 
     Returns
     -------
@@ -141,9 +142,3 @@ def merge_data(
         print("\nFiles merged!")
 
     return df
-
-
-# if __name__ == "__main__":
-# features = load_features(cache_path=os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_features.parquet"))
-# targets = load_targets(cache_path=os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_targets.parquet"))
-# df = merge_data(cache_path=os.path.join(f"{LOCAL_DATA_PATH}",f"{BQ_DATASET}_features.parquet"), features,targets)
