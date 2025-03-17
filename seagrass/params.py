@@ -1,23 +1,38 @@
 import os
 
 ##################  ENV VARIABLES  #####################
-DATA_SIZE = os.environ.get("DATA_SIZE")
-MODEL_TARGET = os.environ.get("MODEL_TARGET")
 GCP_PROJECT = os.environ.get("GCP_PROJECT")
 BQ_DATASET = os.environ.get("BQ_DATASET")
 BQ_REGION = os.environ.get("BQ_REGION")
-BUCKET_NAME = os.environ.get("BUCKET_NAME")
 
 COPERNICUSMARINE_SERVICE_USERNAME = os.environ.get("COPERNICUSMARINE_SERVICE_USERNAME")
 COPERNICUSMARINE_SERVICE_PASSWORD = os.environ.get("COPERNICUSMARINE_SERVICE_PASSWORD")
 
 ##################  CONSTANTS  #####################
-LOCAL_DATA_PATH = os.path.join(os.path.expanduser("~"), ".seagrass", "mlops", "data")
+
+LOCAL_DATA_PATH = os.path.join(os.path.expanduser("~"), "lewagon", "seagrass", "data")
 LOCAL_REGISTRY_PATH = os.path.join(
-    os.path.expanduser("~"), ".seagrass", "mlops", "training_outputs"
+    os.path.expanduser("~"), "lewagon", "seagrass", "training_outputs"
 )
 
+os.makedirs(LOCAL_DATA_PATH, exist_ok=True)
+os.makedirs(LOCAL_REGISTRY_PATH, exist_ok=True)
+
 ##################  DATABASE  #####################
+FEATURE_LABELS = [
+    "lat",
+    "lon",
+    "po4",
+    "no3",
+    "si",
+    "nh4",
+    "bottom_temp",
+    "chlorophyll",
+    "avg_temp",
+    "salinity",
+    "depth",
+]
+TARGET_LABEL = "FAMILY"
 
 FEATURE_LABELS = [
     "avg_temp",
@@ -33,11 +48,6 @@ FEATURE_LABELS = [
 TARGET_LABEL = ["family"]
 
 ################## VALIDATIONS #################
-
-env_valid_options = dict(
-    DATA_SIZE=["1k", "200k", "all"],
-    MODEL_TARGET=["local", "gcs", "mlflow"],
-)
 
 
 def validate_env_value(env, valid_options):

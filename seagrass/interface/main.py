@@ -2,14 +2,13 @@ import os
 import numpy as np
 import os
 
-from numerize import numerize
 from sklearn.model_selection import train_test_split
 
 from seagrass.ml_logic.registry import load_model, save_model
 
 import geopandas as gpd
 from pathlib import Path
-from seagrass.ml_logic.model import XGBTrainer
+from seagrass.ml_logic.model import XGBTrainer, Clusterer
 
 from seagrass.ml_logic.load_data import load_features, load_targets, merge_data
 from seagrass.params import (
