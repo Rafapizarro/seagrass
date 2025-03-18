@@ -49,7 +49,7 @@ def train_test_val_split(merge_df: pd.DataFrame):
             "verif",
             "Shape_Leng",
             "Shape_Area",
-            "FAMILY_mapped",
+            #"FAMILY_mapped",
         ]
     )
     y = merge_df["FAMILY"].map(
@@ -65,10 +65,10 @@ def train_test_val_split(merge_df: pd.DataFrame):
 
     # Split the data into training, validation, and test sets
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+        X, y, test_size=0.2, random_state=42,stratify=y
     )
     X_train, X_val, y_train, y_val = train_test_split(
-        X_train, y_train, test_size=0.25, random_state=42
+        X_train, y_train, test_size=0.25, random_state=42, stratify=y_train
     )
 
     print("X_train shape:", X_train.shape)
