@@ -3,10 +3,17 @@
 
 run_preprocess:
 <<<<<<< HEAD
+<<<<<<< HEAD
 	python -c 'from seagrass.interface.main import preprocess; preprocess(max_distance=0.01, limit=100000)'
 
 run_train:
 	python -c 'from seagrass.interface.main import train; train(max_distance=0.01, limit=100000)'
+=======
+	python -c 'from seagrass.interface.main import preprocess; preprocess(max_distance=0.01, limit=1000)'
+
+run_train:
+	python -c 'from seagrass.interface.main import train; train(max_distance=0.01, limit=1000)'
+>>>>>>> 18dbd0ae0e921d8370ea73d4380007ece1d3e54b
 =======
 	python -c 'from seagrass.interface.main import preprocess; preprocess(max_distance=0.01, limit=1000)'
 

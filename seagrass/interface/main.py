@@ -5,6 +5,10 @@ import os
 from sklearn.model_selection import train_test_split
 
 from seagrass.ml_logic.preprocessor import train_test_val_split
+<<<<<<< HEAD
+=======
+from seagrass.ml_logic.registry import load_model, save_model
+>>>>>>> 18dbd0ae0e921d8370ea73d4380007ece1d3e54b
 
 import geopandas as gpd
 from pathlib import Path
@@ -109,7 +113,11 @@ def train(
     #     WHERE condition
     #     ORDER BY pickup_datetime
     # """
+<<<<<<< HEAD
     print(f"{BQ_DATASET}_{bq_table}.parquet")
+=======
+
+>>>>>>> 18dbd0ae0e921d8370ea73d4380007ece1d3e54b
     main_data_cache_path = os.path.join(
         f"{LOCAL_DATA_PATH}", f"{BQ_DATASET}_{bq_table}.parquet"
     )

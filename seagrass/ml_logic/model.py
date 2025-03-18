@@ -44,7 +44,11 @@ class XGBTrainer:
         return self.model
 
     def train_eval(self, X_train, y_train, X_val, y_val, X_test, y_test):
+<<<<<<< HEAD
         print("Training model...\n")
+=======
+        # print("Training model...")
+>>>>>>> 18dbd0ae0e921d8370ea73d4380007ece1d3e54b
 
         self.model.fit(
             X_train,
