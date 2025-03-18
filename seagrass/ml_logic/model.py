@@ -10,20 +10,24 @@ from seagrass.params import LOCAL_REGISTRY_PATH
 
 
 class XGBTrainer:
-    def __init__(self):
-        self.model = xgb.XGBClassifier(
-            objective="multi:softmax",
-            num_class=5,
-            eval_metric="mlogloss",
-            n_estimators=500,
-            tree_method="hist",
-            max_depth=5,
-            min_child_weight=5,
-            subsample=0.8,
-            colsample_bytree=0.8,
-            early_stopping_rounds=20,
-            random_state=42,
-        )
+    def __init__(self, params=None):
+        if params is None:
+            self.model = xgb.XGBClassifier(
+                objective="multi:softmax",
+                num_class=5,
+                eval_metric="mlogloss",
+                n_estimators=500,
+                tree_method="hist",
+                max_depth=5,
+                min_child_weight=5,
+                subsample=0.8,
+                colsample_bytree=0.8,
+                early_stopping_rounds=20,
+                random_state=42,
+            )
+        else:
+            self.model = xgb.XGBClassifier(**params)
+
         self.trained = False
         self.model_path = os.path.join(LOCAL_REGISTRY_PATH, "models", "xgb.ubj")
 
@@ -33,6 +37,8 @@ class XGBTrainer:
             y_train,
             eval_set=[(X_val, y_val)],
             verbose=False,
+            eval_metric="mlogloss",
+            early_stopping_rounds=self.model.early_stopping_rounds,
         )
         self.trained = True
         return self.model
@@ -44,11 +50,11 @@ class XGBTrainer:
             X_train,
             y_train,
             eval_set=[(X_val, y_val)],
-            verbose=False,
+            verbose=0,
         )
 
         self.trained = True
-        print("Training complete.\n")
+        # print("Training complete.\n")
 
         y_pred = self.model.predict(X_test)
         y_pred_proba = self.model.predict_proba(X_test)
