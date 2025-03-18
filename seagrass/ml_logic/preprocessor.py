@@ -49,7 +49,6 @@ def train_test_val_split(merge_df: pd.DataFrame):
             "verif",
             "Shape_Leng",
             "Shape_Area",
-<<<<<<< HEAD
         ]
     )
     y = (
@@ -73,28 +72,6 @@ def train_test_val_split(merge_df: pd.DataFrame):
     )
     X_train, X_val, y_train, y_val = train_test_split(
         X_train, y_train, test_size=0.25, random_state=42, stratify=y_train
-=======
-            "FAMILY_mapped",
-        ]
-    )
-    y = merge_df["FAMILY"].map(
-        {
-            None: 0,
-            np.nan: 0,
-            "Not reported": 1,
-            "Posidoniaceae": 2,
-            "Cymodoceaceae": 3,
-            "Hydrocharitaceae": 1,
-        }
-    ).fillna(0)
-
-    # Split the data into training, validation, and test sets
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_train, y_train, test_size=0.25, random_state=42
->>>>>>> 18dbd0ae0e921d8370ea73d4380007ece1d3e54b
     )
 
     print("X_train shape:", X_train.shape)

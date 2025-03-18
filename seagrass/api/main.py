@@ -15,16 +15,8 @@ from seagrass.api.connexion import DBConnexion
 from seagrass.ml_logic.model import XGBTrainer
 
 app = FastAPI()
-<<<<<<< HEAD
-<<<<<<< HEAD
 app.state.model = XGBTrainer().load()
 # save the model into the state
-=======
-# load the model into the state
->>>>>>> 18dbd0ae0e921d8370ea73d4380007ece1d3e54b
-=======
-# load the model into the state
->>>>>>> 18dbd0ae0e921d8370ea73d4380007ece1d3e54b
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,8 +28,6 @@ app.add_middleware(
 
 
 @app.get("/predict")
-<<<<<<< HEAD
-<<<<<<< HEAD
 # http://localhost:8000/predict?latitudes=32.8125+32.9999&longitudes=13.8333+13.9999
 def get_seagrass_prediction(latitudes: str, longitudes: str):
     # load the model from the state
@@ -101,39 +91,3 @@ def get_seagrass_prediction(latitudes: str, longitudes: str):
 
     # # Test return from API
     return {"preds": points_probs}
-=======
-# http://localhost:8000/predict?latitudes=40,41&longitudes=-1,0
-def get_seagrass_prediction(latitudes: str, longitudes: str):
-    # load the model from the state
-
-    #create random placeholder values
-
-    # create df from random placeholder values
-
-    # predict probabilities with loaded model
-
-    #return probabilities
-    latitudes = latitudes.split(",")
-    longitudes = longitudes.split(",")
-
-    # Test return from API
-    return {"latitudes": latitudes, "longitudes": longitudes}
->>>>>>> 18dbd0ae0e921d8370ea73d4380007ece1d3e54b
-=======
-# http://localhost:8000/predict?latitudes=40,41&longitudes=-1,0
-def get_seagrass_prediction(latitudes: str, longitudes: str):
-    # load the model from the state
-
-    #create random placeholder values
-
-    # create df from random placeholder values
-
-    # predict probabilities with loaded model
-
-    #return probabilities
-    latitudes = latitudes.split(",")
-    longitudes = longitudes.split(",")
-
-    # Test return from API
-    return {"latitudes": latitudes, "longitudes": longitudes}
->>>>>>> 18dbd0ae0e921d8370ea73d4380007ece1d3e54b
