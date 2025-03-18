@@ -90,6 +90,7 @@ def load_targets(cache_path: Path, limit=None) -> gpd.GeoDataFrame:
 
 
 def merge_data(
+    cache_path: Path,
     features: gpd.GeoDataFrame,
     targets: gpd.GeoDataFrame,
     size_data="all",
@@ -121,7 +122,7 @@ def merge_data(
     else:
         print("\nMerging files...")
         df = gpd.sjoin_nearest(features, targets, how="left", max_distance=max_distance)
-        df["geometry"] = df["geometry"].apply(wkt.dumps)
+        # df["geometry"] = df["geometry"].apply(wkt.dumps)
 
         # Save all main data to local files
         df.to_parquet(cache_path)
