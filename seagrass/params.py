@@ -10,15 +10,18 @@ COPERNICUSMARINE_SERVICE_PASSWORD = os.environ.get("COPERNICUSMARINE_SERVICE_PAS
 
 ##################  CONSTANTS  #####################
 
-LOCAL_DATA_PATH = os.path.join(os.path.expanduser("~"), "lewagon", "seagrass", "data")
+LOCAL_DATA_PATH = os.path.join(os.path.expanduser("~"), ".seagrass", "mlops", "data")
 LOCAL_REGISTRY_PATH = os.path.join(
-    os.path.expanduser("~"), "lewagon", "seagrass", "training_outputs"
+    os.path.expanduser("~"), ".seagrass", "mlops", "training_outputs"
 )
 
 os.makedirs(LOCAL_DATA_PATH, exist_ok=True)
 os.makedirs(LOCAL_REGISTRY_PATH, exist_ok=True)
 
 ##################  DATABASE  #####################
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
 FEATURE_LABELS = [
     "lat",
     "lon",
@@ -34,6 +37,10 @@ FEATURE_LABELS = [
 ]
 TARGET_LABEL = "FAMILY"
 
+##################  CONNEXIONS  #####################
+
+API_HOST = os.environ.get("API_HOST")
+API_PORT = os.environ.get("API_PORT")
 
 ################## VALIDATIONS #################
 
