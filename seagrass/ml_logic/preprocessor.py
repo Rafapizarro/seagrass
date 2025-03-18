@@ -49,7 +49,7 @@ def train_test_val_split(merge_df: pd.DataFrame):
             "verif",
             "Shape_Leng",
             "Shape_Area",
-            # "FAMILY_mapped",
+            "FAMILY_mapped",
         ]
     )
     y = merge_df["FAMILY"].map(

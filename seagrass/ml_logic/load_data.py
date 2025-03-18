@@ -36,7 +36,7 @@ def load_features(cache_path: Path, limit=None) -> gpd.GeoDataFrame:
         client = bigquery.Client()
         query = f"""
         SELECT *
-        FROM `{GCP_PROJECT}.{BQ_DATASET}.merged_features`
+        FROM `{GCP_PROJECT}.{BQ_DATASET}.Merged_features_filtered_out_polygons`
         """
         if limit:
             query += f" LIMIT {limit}"
