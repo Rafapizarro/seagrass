@@ -59,9 +59,9 @@ mocked_data = [
 
 @st.cache_data(ttl=3600)
 def get_api_prediction(endpoint="", query=None):
-    # response = APIRequest().get(endpoint, query)
-    # return response["preds"]
-    return mocked_data
+    response = APIRequest().get(endpoint, query)
+    return response["preds"]
+    #return mocked_data
 
 
 if "prediction_points" not in st.session_state:
