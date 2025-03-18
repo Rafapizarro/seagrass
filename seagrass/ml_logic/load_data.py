@@ -36,7 +36,7 @@ def load_features(cache_path: Path, limit=None) -> gpd.GeoDataFrame:
         client = bigquery.Client()
         query = f"""
         SELECT *
-        FROM `{GCP_PROJECT}.{BQ_DATASET}.merged_features`
+        FROM `{GCP_PROJECT}.{BQ_DATASET}.Merged_features_filtered_out_polygons`
         """
         if limit:
             query += f" LIMIT {limit}"
@@ -90,11 +90,10 @@ def load_targets(cache_path: Path, limit=None) -> gpd.GeoDataFrame:
 
 
 def merge_data(
-    cache_path: Path,
     features: gpd.GeoDataFrame,
     targets: gpd.GeoDataFrame,
     size_data="all",
-    max_distance=0.01,
+    max_distance=0.001,
 ) -> gpd.GeoDataFrame:
     """
     Merge feature and target GeoDataFrames using a spatial nearest join.
