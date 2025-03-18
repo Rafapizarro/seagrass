@@ -37,21 +37,6 @@ FEATURE_LABELS = [
 ]
 TARGET_LABEL = "FAMILY"
 
-FEATURE_LABELS = [
-    "avg_temp",
-    "bottom_temp",
-    "cholorophyll",
-    "depth",
-    "no3",
-    "si",
-    "po4",
-    "nh4",
-    "salinity",
-]
-TARGET_LABEL = ["family"]
-
-CLASSES = ["No grass"]
-
 ##################  CONNEXIONS  #####################
 
 API_HOST = os.environ.get("API_HOST")
