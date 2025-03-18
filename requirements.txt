@@ -60,3 +60,6 @@ numerize
 
 xgboost
 hdbscan
+
+copernicusmarine
+supabase
