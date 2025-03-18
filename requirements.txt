@@ -63,3 +63,5 @@ hdbscan
 
 copernicusmarine
 supabase
+
+grequests
