@@ -18,14 +18,6 @@ LOCAL_REGISTRY_PATH = os.path.join(
 os.makedirs(LOCAL_DATA_PATH, exist_ok=True)
 os.makedirs(LOCAL_REGISTRY_PATH, exist_ok=True)
 
-LOCAL_DATA_PATH = os.path.join(os.path.expanduser("~"), "lewagon", "seagrass", "data")
-LOCAL_REGISTRY_PATH = os.path.join(
-    os.path.expanduser("~"), "lewagon", "seagrass", "training_outputs"
-)
-
-os.makedirs(LOCAL_DATA_PATH, exist_ok=True)
-os.makedirs(LOCAL_REGISTRY_PATH, exist_ok=True)
-
 ##################  DATABASE  #####################
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
@@ -49,33 +41,6 @@ TARGET_LABEL = "FAMILY"
 
 API_HOST = os.environ.get("API_HOST")
 API_PORT = os.environ.get("API_PORT")
-FEATURE_LABELS = [
-    "lat",
-    "lon",
-    "po4",
-    "no3",
-    "si",
-    "nh4",
-    "bottom_temp",
-    "chlorophyll",
-    "avg_temp",
-    "salinity",
-    "depth",
-]
-TARGET_LABEL = "FAMILY"
-
-FEATURE_LABELS = [
-    "avg_temp",
-    "bottom_temp",
-    "cholorophyll",
-    "depth",
-    "no3",
-    "si",
-    "po4",
-    "nh4",
-    "salinity",
-]
-TARGET_LABEL = ["family"]
 
 ################## VALIDATIONS #################
 

@@ -10,7 +10,7 @@ from seagrass.params import LOCAL_REGISTRY_PATH
 
 
 class XGBTrainer:
-    def __init__(self,  params=None):
+    def __init__(self, params=None):
         if params is None:
             self.model = xgb.XGBClassifier(
                 objective="multi:softmax",
