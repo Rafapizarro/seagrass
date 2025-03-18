@@ -2,6 +2,8 @@ from datetime import datetime
 from multiprocessing import set_start_method
 import pandas as pd
 import uvicorn
+import os
+import numpy as np
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -55,6 +57,8 @@ def get_seagrass_prediction(latitudes: str, longitudes: str):
     # return result.data
 
     def get_all_pred_points(data):
+        chlorophyll = data["trend"] if data["trend"] else np.nan
+
         # create values
         res = {
             "lat": data["latitude"],
@@ -64,7 +68,7 @@ def get_seagrass_prediction(latitudes: str, longitudes: str):
             "si": data["si"],
             "nh4": data["nh4"],
             "bottom_temp": data["bottomT"],
-            "chlorophyll": data["trend"],
+            "chlorophyll": chlorophyll,
             "avg_temp": data["thetao"],
             "salinity": data["so"],
             "depth": data["depth"],
@@ -76,7 +80,7 @@ def get_seagrass_prediction(latitudes: str, longitudes: str):
         # predict probabilities with loaded model
         probs = xgb_model.predict_proba(df)
         probs = {
-            "coordinates": f"{data['latitude']}, {data['longitude']}",
+            "coordinates": [res["lat"], res["lon"]],
             "targets": [float(p) for p in probs[0]],
         }
         # return probabilities
