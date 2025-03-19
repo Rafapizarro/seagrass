@@ -93,7 +93,6 @@ def merge_data(
     cache_path: Path,
     features: gpd.GeoDataFrame,
     targets: gpd.GeoDataFrame,
-    cache_path: Path,
     size_data="all",
     max_distance=0.01,
 ) -> gpd.GeoDataFrame:
