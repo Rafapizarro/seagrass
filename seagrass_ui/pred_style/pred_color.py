@@ -1,7 +1,7 @@
 import numpy as np
 
 colors = {
-    0: "red",
+    0: "red",  # Not reported
     1: "blue",
     2: "green",
     3: "yellow",
@@ -16,4 +16,4 @@ def get_pred_color(pred: list):
 
 def get_pred_opacity(pred: list):
     opacity = 1 - (pred[0] / sum(pred))
-    return opacity if opacity > 0.5 else 0.5
+    return opacity if opacity > 0.1 else 0.1

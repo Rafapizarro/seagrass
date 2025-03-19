@@ -2,10 +2,10 @@
 ################# WORKFLOW ############################################
 
 run_preprocess:
-	python -c 'from seagrass.interface.main import preprocess; preprocess(max_distance=0.01, limit=100000)'
+	python -c 'from seagrass.interface.main import preprocess; preprocess(max_distance=0.01)'
 
 run_train:
-	python -c 'from seagrass.interface.main import train; train(max_distance=0.01, limit=100000)'
+	python -c 'from seagrass.interface.main import train; train(max_distance=0.01)'
 
 run_pred:
 	python -c 'from seagrass.interface.main import pred; pred()'
