@@ -37,6 +37,8 @@ FEATURE_LABELS = [
 ]
 TARGET_LABEL = "FAMILY"
 
+CLASSES = ["Not reported", "Posidoniaceae", "Cymodoceaceae", "Hydrocharitaceae"]
+
 ##################  CONNEXIONS  #####################
 
 API_HOST = os.environ.get("API_HOST")

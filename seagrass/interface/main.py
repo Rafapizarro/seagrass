@@ -136,7 +136,7 @@ def train(
 
     model = XGBTrainer()
 
-    f1 = model.train_eval(X_train, y_train, X_val, y_val)
+    f1 = model.train_eval(X_train, y_train, X_val, y_val, X_test, y_test)
 
     model.save(f1)
 

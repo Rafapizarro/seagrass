@@ -7,6 +7,7 @@ from folium.plugins import Draw, MarkerCluster
 import json
 import os
 
+from seagrass.params import CLASSES
 from seagrass_ui.api import APIRequest
 from seagrass_ui.pred_style.pred_color import get_pred_color, get_pred_opacity
 from seagrass_ui.pred_style.pred_dim import get_pred_radius
@@ -59,9 +60,9 @@ mocked_data = [
 
 @st.cache_data(ttl=3600)
 def get_api_prediction(endpoint="", query=None):
-    # response = APIRequest().get(endpoint, query)
-    # return response["preds"]
-    return mocked_data
+    response = APIRequest().get(endpoint, query)
+    return response["preds"]
+    # return mocked_data
 
 
 if "prediction_points" not in st.session_state:
@@ -87,8 +88,13 @@ if st.session_state.prediction_points:
     new_predictions = st.session_state.prediction_points
 
     for idx, row in enumerate(new_predictions):
-        targets_details = [f"{p:.2f}" for p in row["targets"]]
-        msgpopup = f"Prediction: {'-'.join(targets_details)}"
+        targets_details = [
+            f"<li>{CLASSES[idx]} : {(p / sum(row['targets'][1:])) * 100:.2f}%</li>"
+            for idx, p in enumerate(row["targets"][1:])
+        ]
+        no_seagrass_pred = row["targets"][0]
+        msgpopup = f"Seagrass presence: <br>{(1 - no_seagrass_pred) * 100:.2f}%<br>"
+        msgpopup += f"Families: <br/><ul>{''.join(targets_details)}</ul>"
 
         # prediction_value = row["targets"][0]
         # color = "green" if prediction_value > 0.5 else "red"
@@ -96,10 +102,14 @@ if st.session_state.prediction_points:
         opacity = get_pred_opacity(row["targets"])
         radius = get_pred_radius(row["targets"])
 
-        folium.CircleMarker(
+        cm = folium.CircleMarker(
             location=[float(row["coordinates"][0]), float(row["coordinates"][1])],
             radius=5,
-            popup=f"Coordinates: {row['coordinates']} <br> {msgpopup}".format(radius),
+            popup=folium.Popup(
+                f"Coordinates: {row['coordinates']} <br> {msgpopup}".format(radius),
+                parse_html=False,
+                # max_width="100%",
+            ),
             weight=1,
             fill_color=color,
             fill=False,
