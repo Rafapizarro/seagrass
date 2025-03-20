@@ -163,6 +163,9 @@ class Clusterer:
         return self.model
 
 
+
+    '''FROM HERE STARTS THE OPTUNA PART'''
+
     def xgb_get_params(trial):
 
         params = {
@@ -198,8 +201,6 @@ class Clusterer:
         }
         return params
 
-
-
     def create_objective(X_train, y_train, X_val, y_val) -> int | str:
         def objective(trial):
             params = xgb_get_params(trial)
@@ -212,6 +213,9 @@ class Clusterer:
             return f1
 
         return objective
+
+
+    '''THIS PART IS TO BE EXECUTED IN THE NOTEBOOK'''
 
     objective = create_objective(X_train, y_train, X_val, y_val)
     sampler = optuna.samplers.TPESampler(seed=42)
