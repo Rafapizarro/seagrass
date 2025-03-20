@@ -7,7 +7,7 @@ import xgboost as xgb
 from pathlib import Path
 from sklearn.metrics import f1_score, classification_report
 from seagrass.params import LOCAL_REGISTRY_PATH
-import optuna
+# import optuna
 
 
 class XGBTrainer:
