@@ -13,20 +13,43 @@ from seagrass_ui.pred_style.pred_color import get_pred_color, get_pred_opacity
 from seagrass_ui.pred_style.pred_dim import get_pred_radius
 
 
-@st.cache_data(ttl=3600)
-def get_api_prediction(endpoint="", query=None):
-    response = APIRequest().get(endpoint, query)
-    return response["preds"]
-
-
 if "prediction_points" not in st.session_state:
     st.session_state.prediction_points = []
+if "error_api" not in st.session_state:
+    st.session_state.error_api = []
 if "locations" not in st.session_state:
     st.session_state.locations = []
 if "drawings" not in st.session_state:
     st.session_state.drawings = []
 if "needs_rerun" not in st.session_state:
     st.session_state.needs_rerun = False
+
+
+def feed_predictions_state(predictions):
+    if predictions:
+        existing_coords = {
+            (p["coordinates"][0], p["coordinates"][1])
+            for p in st.session_state.prediction_points
+        }
+
+        has_new_predictions = False
+        for p in preds:
+            if (
+                p["coordinates"][0],
+                p["coordinates"][1],
+            ) not in existing_coords:
+                st.session_state.prediction_points.append(p)
+                has_new_predictions = True
+
+        if has_new_predictions:
+            st.session_state.needs_rerun = True
+
+
+@st.cache_data(ttl=3600)
+def get_api_prediction(endpoint="", query=None):
+    response = APIRequest().get(endpoint, query)
+    return response["preds"]
+
 
 st.set_page_config(layout="wide")
 st.title("Seagrass in the Mediterranean Sea")
@@ -47,17 +70,18 @@ if st.session_state.prediction_points:
             for idx, p in enumerate(row["targets"][1:])
         ]
         no_seagrass_pred = row["targets"][0]
+
         check_chlorophyll = (
-            f"Chlorophyll: {row['chlorophyll']}"
-            if row["chlorophyll"]
+            f"Chlorophyll: {row['features']['chlorophyll']:.2f}"
+            if row["features"]["chlorophyll"] is not None
             else "No chlorophyll data"
         )
 
         msgpopup = f"Seagrass presence: <br>{(1 - no_seagrass_pred) * 100:.2f}%<br>"
         msgpopup += f"Families: <br/><ul>{''.join(targets_details)}</ul>"
-        msgpopup += f"Salinity: {row['salinity']}<br>"
+        msgpopup += f"Salinity: {row['features']['salinity']:.2f}<br>"
         msgpopup += check_chlorophyll
-        msgpopup += f"Depth: {row['depth']}<br>"
+        msgpopup += f"Depth: {row['features']['depth']:.2f}<br>"
 
         color = get_pred_color(row["targets"])
         opacity = get_pred_opacity(row["targets"])
@@ -74,8 +98,8 @@ if st.session_state.prediction_points:
             weight=1,
             fill_color=color,
             fill=False,
-            opacity=opacity,
-            fill_opacity=opacity,
+            # opacity=opacity,
+            # fill_opacity=opacity,
         ).add_to(m)
 
 
@@ -85,7 +109,7 @@ draw = Draw(
     draw_options={
         "polyline": False,
         "circlemarker": False,
-        "polygon": True,
+        "polygon": False,
         "marker": True,
         "rectangle": True,
         "circle": False,
@@ -118,6 +142,20 @@ if st.session_state.drawings:
             coords = shape["geometry"]["coordinates"]
             st.sidebar.write(f"Longitude: {coords[0]}, Latitude: {coords[1]}")
 
+            if coords[0] and coords[1]:
+                preds = get_api_prediction(
+                    endpoint="point",
+                    query={
+                        "latitude": [coords[1]],
+                        "longitude": [coords[0]],
+                    },
+                )
+                if "error" in preds[0]:
+                    st.session_state.error_api.append(f"Error: {preds[0]['error']}")
+                    st.sidebar.write(st.session_state.error_api[0])
+                else:
+                    feed_predictions_state(preds)
+
         elif shape["geometry"]["type"] == "Polygon" and new_drawings:
             coords = shape["geometry"]["coordinates"][0]
             for j, point in enumerate(coords):
@@ -141,23 +179,29 @@ if st.session_state.drawings:
                     },
                 )
 
-                if preds:
-                    existing_coords = {
-                        (p["coordinates"][0], p["coordinates"][1])
-                        for p in st.session_state.prediction_points
-                    }
+                if "error" in preds[0]:
+                    st.session_state.error_api.append(f"Error: {preds[0]['error']}")
+                    st.sidebar.write(st.session_state.error_api[0])
+                else:
+                    feed_predictions_state(preds)
 
-                    has_new_predictions = False
-                    for p in preds:
-                        if (
-                            p["coordinates"][0],
-                            p["coordinates"][1],
-                        ) not in existing_coords:
-                            st.session_state.prediction_points.append(p)
-                            has_new_predictions = True
+                # if preds:
+                #     existing_coords = {
+                #         (p["coordinates"][0], p["coordinates"][1])
+                #         for p in st.session_state.prediction_points
+                #     }
 
-                    if has_new_predictions:
-                        st.session_state.needs_rerun = True
+                #     has_new_predictions = False
+                #     for p in preds:
+                #         if (
+                #             p["coordinates"][0],
+                #             p["coordinates"][1],
+                #         ) not in existing_coords:
+                #             st.session_state.prediction_points.append(p)
+                #             has_new_predictions = True
+
+                #     if has_new_predictions:
+                #         st.session_state.needs_rerun = True
 
         st.sidebar.write(f"Salinity: TO FILL IN")
         st.sidebar.write(f"Seagrass: TO FILL IN")

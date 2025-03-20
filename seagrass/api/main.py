@@ -8,6 +8,7 @@ from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 import supabase
+import json
 
 from seagrass.params import *
 
@@ -16,8 +17,12 @@ from seagrass.ml_logic.model import XGBTrainer
 
 app = FastAPI()
 app.state.model = XGBTrainer().load()
-# save the model into the state
+# if "model" not in app.state.__dict__:
+#     raise HTTPException(
+#         status_code=404, detail=f"Error during loading: {app.state.__dict__.keys()}"
+#     )
 
+# save the model into the state
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allpipows all origins
@@ -27,10 +32,8 @@ app.add_middleware(
 )
 
 
+# Get prediction for one specfic point
 def get_pred_point(data):
-    if "model" not in app.state:
-        raise HTTPException(status_code=404, detail="Error during loading")
-
     # load the model from the state
     xgb_model = app.state.model
 
@@ -54,10 +57,12 @@ def get_pred_point(data):
     # create df from values
     df = pd.DataFrame([res], columns=res.keys())
 
-    # predict probabilities with loaded model
+    # predict probabilities with loaded model for 1 point
     probs = xgb_model.predict_proba(df)
+
+    # return the prediction for 1 point
     probs = {
-        "coordinates": [res["lat"], res["lon"]],
+        "coordinates": [float(res["lat"]), float(res["lon"])],
         "targets": [float(p) for p in probs[0]],
         "features": {
             # "po4": res["po4"],
@@ -65,48 +70,21 @@ def get_pred_point(data):
             # "si": res["si"],
             # "nh4": res["nh4"],
             # "bottom_temp": res["bottom_temp"],
-            "chlorophyll": chlorophyll if chlorophyll else None,
+            "chlorophyll": float(chlorophyll) if chlorophyll else 0.0,
             # "avg_temp": res["avg_temp"],
-            "salinity": res["salinity"],
-            "depth": res["depth"],
+            "salinity": float(res["salinity"]),
+            "depth": float(res["depth"]),
         },
     }
-    # return probabilities
 
     return probs
-
-
-@app.get("/point")
-# http://localhost:8000/predict?latitude=32.9999&longitudes=13.9999
-def get_point_prediction(latitude: float, longitude: float):
-    db_client = DBConnexion().get_connexion()
-
-    result = (
-        db_client.table("seagrass_features")
-        .select("*")
-        .eq("latitude", latitude)
-        .eq("longitude", longitude)
-        .execute()
-    )
-
-    if "data" in result:
-        points_probs = [get_pred_point(p) for idx, p in enumerate(result.data)]
-
-        # # Test return from API
-        return {"preds": points_probs}
-    else:
-        return {"preds": []}
 
 
 @app.get("/predict")
 # http://localhost:8000/predict?latitudes=32.8125+32.9999&longitudes=13.8333+13.9999
 def get_seagrass_prediction(latitudes: str, longitudes: str):
-    if "model" not in app.state:
-        raise HTTPException(status_code=404, detail="Error during loading")
-
+    # breakpoint()
     # load the model from the state
-    xgb_model = app.state.model
-
     lats = latitudes.split(" ")
     longs = longitudes.split(" ")
 
@@ -122,10 +100,35 @@ def get_seagrass_prediction(latitudes: str, longitudes: str):
         .execute()
     )
 
-    if "data" in result:
-        points_probs = get_pred_point(result.data)
+    if "data" in result.__dict__:
+        if len(result.data) == 0:
+            return {"preds": [{"error": "No data available for all of these points"}]}
+        points_probs = [get_pred_point(p) for p in result.data]
+
+        return json.dumps({"preds": points_probs})
 
         # # Test return from API
-        return {"preds": points_probs}
+        # return {"preds": points_probs}
     else:
-        return {"preds": []}
+        return {"preds": [{"error": "No data available for all of these points"}]}
+
+
+@app.get("/point")
+# http://localhost:8000/point?latitude=-0.103683&longitude=39.458993
+def get_point_prediction(latitude: float, longitude: float):
+    db_client = DBConnexion().get_connexion()
+
+    result = db_client.rpc(
+        "get_closest_point", {"target_lon": longitude, "target_lat": latitude}
+    ).execute()
+    # breakpoint()
+
+    if "data" in result.__dict__:
+        if float(result.data[0]["distance"]) > 0.02:
+            return {"preds": [{"error": "No data available for this point"}]}
+        point_prob = get_pred_point(result.data[0])
+
+        # # Test return from API
+        return json.dumps({"preds": [point_prob]})
+    else:
+        return {"preds": [{"error": "No data available for this point"}]}
