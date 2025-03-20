@@ -12,57 +12,11 @@ from seagrass_ui.api import APIRequest
 from seagrass_ui.pred_style.pred_color import get_pred_color, get_pred_opacity
 from seagrass_ui.pred_style.pred_dim import get_pred_radius
 
-mocked_data = [
-    {
-        "coordinates": [41.8125, 4.2083],
-        "targets": [0.1, 0.2, 0.3, 0.2, 0.2],
-    },
-    {
-        "coordinates": [41.7708, 4.2083],
-        "targets": [0.1, 0.1, 0.25, 0.25, 0.3],
-    },
-    {
-        "coordinates": [41.8542, 4.2083],
-        "targets": [0.4, 0.2, 0.1, 0.2, 0.1],
-    },
-    {
-        "coordinates": [41.9375, 4.2083],
-        "targets": [
-            0.0949656128883362,
-            0.9012578460155054927,
-            0.0012579282047227025,
-            0.0012594683794304729,
-            0.0012590594124048948,
-        ],
-    },
-    {
-        "coordinates": [41.9792, 4.2083],
-        "targets": [
-            0.0949656128883362,
-            0.0012578460155054927,
-            0.0012579282047227025,
-            0.9012594683794304729,
-            0.0012590594124048948,
-        ],
-    },
-    {
-        "coordinates": [42.0208, 4.2083],
-        "targets": [
-            0.9949656128883362,
-            0.0012578460155054927,
-            0.0012579282047227025,
-            0.0012594683794304729,
-            0.0012590594124048948,
-        ],
-    },
-]
-
 
 @st.cache_data(ttl=3600)
 def get_api_prediction(endpoint="", query=None):
     response = APIRequest().get(endpoint, query)
     return response["preds"]
-    # return mocked_data
 
 
 if "prediction_points" not in st.session_state:
@@ -93,11 +47,18 @@ if st.session_state.prediction_points:
             for idx, p in enumerate(row["targets"][1:])
         ]
         no_seagrass_pred = row["targets"][0]
+        check_chlorophyll = (
+            f"Chlorophyll: {row['chlorophyll']}"
+            if row["chlorophyll"]
+            else "No chlorophyll data"
+        )
+
         msgpopup = f"Seagrass presence: <br>{(1 - no_seagrass_pred) * 100:.2f}%<br>"
         msgpopup += f"Families: <br/><ul>{''.join(targets_details)}</ul>"
+        msgpopup += f"Salinity: {row['salinity']}<br>"
+        msgpopup += check_chlorophyll
+        msgpopup += f"Depth: {row['depth']}<br>"
 
-        # prediction_value = row["targets"][0]
-        # color = "green" if prediction_value > 0.5 else "red"
         color = get_pred_color(row["targets"])
         opacity = get_pred_opacity(row["targets"])
         radius = get_pred_radius(row["targets"])
