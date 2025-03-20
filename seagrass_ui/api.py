@@ -5,14 +5,13 @@ import os
 
 class APIRequest:
     def __init__(self):
-        host = os.environ.get("API_HOST")
-        port = os.environ.get("API_PORT")
-
         api_url = os.environ.get("API_URL")
 
         mode = os.environ.get("API_MODE")
 
         if mode == "dev":
+            host = os.environ.get("API_HOST")
+            port = os.environ.get("API_PORT")
             self.url = f"{host}:{port}/"
         elif mode == "prod":
             self.url = api_url
