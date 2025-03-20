@@ -7,6 +7,7 @@ import xgboost as xgb
 from pathlib import Path
 from sklearn.metrics import f1_score, classification_report
 from seagrass.params import LOCAL_REGISTRY_PATH
+import optuna
 
 
 class XGBTrainer:
@@ -160,6 +161,68 @@ class Clusterer:
         print(f"Model loaded from {path}")
 
         return self.model
+
+
+    def xgb_get_params(trial):
+
+        params = {
+            "objective": "multi:softmax",
+            # "booster": "dart",  # trial.suggest_categorical("booster", ["gbtree", "dart"]),
+            "n_jobs": -1,
+            "verbosity": 0,
+            "learning_rate": trial.suggest_float("learning_rate", 0.001, 0.7),
+            "max_depth": trial.suggest_int("max_depth", 3, 20, step=1),
+            # "max_leaves": trial.suggest_int("max_leaves", 10, 100, step=1),
+            "n_estimators": trial.suggest_int("n_estimators", 200, 2000, step=10),
+            # "num_parallel_tree": trial.suggest_int("n_estimators", 1, 10, step=1),
+            # "reg_alpha": trial.suggest_float("reg_alpha", 1e-8, 100.0, log=True),
+            # "reg_lambda": trial.suggest_float("reg_lambda", 0.0, 10.0, step=0.1),
+            "subsample": trial.suggest_float("subsample", 0.5, 1.0, step=0.1),
+            # "max_delta_step": trial.suggest_int("max_delta_step", 1, 10, step=1),
+            # "min_child_weight": trial.suggest_int("min_child_weight", 1, 10, step=1),
+            "colsample_bytree": trial.suggest_float("colsample_bytree", 0.1, 1.0, log=True),
+            # "colsample_bylevel": trial.suggest_float(
+            #     "colsample_bylevel ", 0.1, 1.0, log=True
+            # ),
+            # "colsample_bynode": trial.suggest_float("colsample_bynode", 0.1, 1.0, log=True),
+            # "rate_drop":   trial.suggest_float("rate_drop", 1e-8, 1.0, log=True),
+            # "skip_drop":   trial.suggest_float("skip_drop", 1e-8, 1.0, log=True),
+            # "scale_pos_weight": trial.suggest_float(
+            #     "scale_pos_weight", 1.0, 10.0, step=0.1
+            # ),
+            "min_child_weight": trial.suggest_int("min_child_weight", 1, 10, step=1),  # Regularization
+            "reg_alpha": trial.suggest_float("reg_alpha", 1e-8, 10.0, log=True),  # L1 regularization
+            "reg_lambda": trial.suggest_float("reg_lambda", 0.0, 10.0, step=0.1),  # L2 regularization
+            "eval_metric": "mlogloss",
+            "random_state": 42,
+        }
+        return params
+
+
+
+    def create_objective(X_train, y_train, X_val, y_val) -> int | str:
+        def objective(trial):
+            params = xgb_get_params(trial)
+            model = XGBTrainer(params=params)
+            f1 = model.train_eval(X_train, y_train, X_val, y_val, X_test, y_test)
+            # model = xgb.XGBClassifier(**params)
+            # model.fit(X_train, y_train, X_val, y_val)
+            # return model.score(X_val, y_val)
+
+            return f1
+
+        return objective
+
+    objective = create_objective(X_train, y_train, X_val, y_val)
+    sampler = optuna.samplers.TPESampler(seed=42)
+    study = optuna.create_study(
+            #storage="/data",
+            direction="maximize",
+            sampler=sampler,
+            study_name="optuna_seagrass",
+            load_if_exists=True,
+        )
+    study.optimize(objective, n_trials=1000)
 
 
 if __name__ == "__main__":

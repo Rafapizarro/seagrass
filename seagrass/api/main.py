@@ -4,7 +4,8 @@ import pandas as pd
 import uvicorn
 import os
 import numpy as np
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, HTTPException
+
 from fastapi.middleware.cors import CORSMiddleware
 
 import supabase
@@ -16,6 +17,8 @@ from seagrass.ml_logic.model import XGBTrainer
 
 app = FastAPI()
 app.state.model = XGBTrainer().load()
+if not app.state.model:
+    raise HTTPException(status_code=500, detail="ML model is not loaded.")
 # save the model into the state
 
 app.add_middleware(
