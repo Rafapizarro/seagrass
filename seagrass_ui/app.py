@@ -7,11 +7,12 @@ from folium.plugins import Draw, MarkerCluster
 import json
 import os
 
-from seagrass.params import CLASSES
+
 from seagrass_ui.api import APIRequest
 from seagrass_ui.pred_style.pred_color import get_pred_color, get_pred_opacity
 from seagrass_ui.pred_style.pred_dim import get_pred_radius
 
+CLASSES = ["Not reported", "Posidoniaceae", "Cymodoceaceae", "Hydrocharitaceae"]
 
 if "prediction_points" not in st.session_state:
     st.session_state.prediction_points = []
