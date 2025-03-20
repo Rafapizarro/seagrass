@@ -17,6 +17,8 @@ from seagrass.ml_logic.model import XGBTrainer
 
 app = FastAPI()
 app.state.model = XGBTrainer().load()
+# if not app.state.model:
+#     raise HTTPException(status_code=500, detail="ML model is not loaded.")
 
 # save the model into the state
 app.add_middleware(

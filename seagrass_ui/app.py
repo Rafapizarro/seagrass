@@ -93,7 +93,7 @@ if st.session_state.prediction_points:
         opacity = get_pred_opacity(row["targets"])
         radius = get_pred_radius(row["targets"])
 
-        cm = folium.CircleMarker(
+        folium.CircleMarker(
             location=[float(row["coordinates"][0]), float(row["coordinates"][1])],
             radius=5,
             popup=folium.Popup(
@@ -190,24 +190,6 @@ if st.session_state.drawings:
                     st.sidebar.write(f"Error: {preds[0]['error']}")
                 else:
                     feed_predictions_state(preds)
-
-                # if preds:
-                #     existing_coords = {
-                #         (p["coordinates"][0], p["coordinates"][1])
-                #         for p in st.session_state.prediction_points
-                #     }
-
-                #     has_new_predictions = False
-                #     for p in preds:
-                #         if (
-                #             p["coordinates"][0],
-                #             p["coordinates"][1],
-                #         ) not in existing_coords:
-                #             st.session_state.prediction_points.append(p)
-                #             has_new_predictions = True
-
-                #     if has_new_predictions:
-                #         st.session_state.needs_rerun = True
 
         st.sidebar.write(f"Salinity: TO FILL IN")
         st.sidebar.write(f"Seagrass: TO FILL IN")
