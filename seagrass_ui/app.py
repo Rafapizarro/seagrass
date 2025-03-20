@@ -13,6 +13,12 @@ from pred_style.pred_color import get_pred_color, get_pred_opacity
 from pred_style.pred_dim import get_pred_radius
 
 CLASSES = ["Not reported", "Posidoniaceae", "Cymodoceaceae", "Hydrocharitaceae"]
+MOLECULES = {
+    "po4": "Phosphate",
+    "no3": "Nitrate",
+    "si": "Silicate",
+    "nh4": "Ammonium",
+}
 
 if "prediction_points" not in st.session_state:
     st.session_state.prediction_points = []
@@ -79,16 +85,22 @@ if st.session_state.prediction_points:
         seagrass_presence = (1 - no_seagrass_pred) * 100
 
         msgpopup = (
-            f"Seagrass presence : {seagrass_presence:.2f}%<br><br>"
+            f"<div>Seagrass presence : {seagrass_presence:.2f}%<br><br>"
             if seagrass_presence >= 0.01
-            else "Seagrass presence : >0.01%<br><br>"
+            else "<div>Seagrass presence : 0.01%<br><br>"
         )
         msgpopup += f"Families :<br/><ul>{''.join(targets_details)}</ul>"
-        msgpopup += (
-            f"Characteristics :<br>Salinity: {row['features']['salinity']:.2f}<br>"
-        )
+        msgpopup += f"Characteristics (from <a href='https://data.marine.copernicus.eu/products' target='_blank'>Copernicus</a>):<br>Salinity: {row['features']['salinity']:.2f}<br>"
         msgpopup += check_chlorophyll
         # msgpopup += f"Depth: {row['features']['depth']:.2f}m<br>"
+        msgpopup += "<br>"
+
+        msgpopup += "Nutrients:<br><ul>"
+        msgpopup += f"<li>{MOLECULES['po4']}: {row['features']['po4']:.2f}</li>"
+        msgpopup += f"<li>{MOLECULES['no3']}: {row['features']['no3']:.2f}</li>"
+        msgpopup += f"<li>{MOLECULES['si']}: {row['features']['si']:.2f}</li>"
+        msgpopup += f"<li>{MOLECULES['nh4']}: {row['features']['nh4']:.2f}</li>"
+        msgpopup += "</ul></div>"
 
         color = get_pred_color(row["targets"])
         opacity = get_pred_opacity(row["targets"])
@@ -98,7 +110,7 @@ if st.session_state.prediction_points:
             location=[float(row["coordinates"][0]), float(row["coordinates"][1])],
             radius=5,
             popup=folium.Popup(
-                f"<div style='width:200px'>Coordinates: {row['coordinates'][0]} {row['coordinates'][1]}<br><br> {msgpopup}</div>".format(
+                f"<div style='width:200px'>Coordinates: {row['coordinates'][0]} {row['coordinates'][1]}<br><br>{msgpopup}</div>".format(
                     radius
                 ),
                 parse_html=False,
@@ -107,10 +119,34 @@ if st.session_state.prediction_points:
             weight=1,
             fill_color=color,
             fill=False,
-            opacity=opacity,
-            fill_opacity=opacity,
+            # opacity=opacity,
+            # fill_opacity=opacity,
         ).add_to(m)
 
+st.markdown(
+    """
+    <style>
+    .legend {
+        position: fixed;
+        bottom: 50px;
+        right: 50px;
+        width: 200px;
+        background-color: rgba(255, 255, 255, 0.85);
+        border: 2px solid grey;
+        z-index: 1000;
+        padding: 10px;
+    }
+    </style>
+    <div class="legend">
+        <b>Legend</b><br>
+        :grand_cercle_orange: Not Reported<br>
+        :grand_cercle_bleu: Posidoniaceae<br>
+        :grand_cercle_vert: Cymodoceaceae<br>
+        :grand_cercle_violet: Hydrocharitaceae
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 draw = Draw(
     export=False,

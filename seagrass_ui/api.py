@@ -7,13 +7,14 @@ class APIRequest:
     def __init__(self):
         api_url = os.environ.get("API_URL")
 
-        mode = os.environ.get("API_MODE")
+        api_mode = os.environ.get("API_MODE")
 
-        if mode == "dev":
+        self.url = ""
+        if api_mode == "dev":
             host = os.environ.get("API_HOST")
             port = os.environ.get("API_PORT")
             self.url = f"{host}:{port}/"
-        elif mode == "prod":
+        elif api_mode == "prod":
             self.url = api_url
 
     def get(self, endpoint, query=None):

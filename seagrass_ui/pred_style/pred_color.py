@@ -5,7 +5,7 @@ colors = {
     0: "orange",  # Not reported
     1: "blue",
     2: "green",
-    3: "yellow",
+    3: "pink",
 }
 
 
