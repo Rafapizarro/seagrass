@@ -7,7 +7,16 @@ class APIRequest:
     def __init__(self):
         host = os.environ.get("API_HOST")
         port = os.environ.get("API_PORT")
-        self.url = f"{host}:{port}/"
+        self.url = f"https://seagrass-478691650577.europe-west1.run.app/"
+
+
+
+
+
+
+
+
+
 
     def get(self, endpoint, query=None):
         if query:
