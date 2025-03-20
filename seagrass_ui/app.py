@@ -71,7 +71,7 @@ if st.session_state.prediction_points:
         no_seagrass_pred = row["targets"][0]
 
         check_chlorophyll = (
-            f"Chlorophyll: {row['features']['chlorophyll']:.2f}<br>"
+            f"Chlorophyll: {row['features']['chlorophyll']:.2f}%<br>"
             if row["features"]["chlorophyll"] is not None
             else "No chlorophyll data<br>"
         )
@@ -88,7 +88,7 @@ if st.session_state.prediction_points:
             f"Characteristics :<br>Salinity: {row['features']['salinity']:.2f}<br>"
         )
         msgpopup += check_chlorophyll
-        msgpopup += f"Depth: {row['features']['depth']:.2f}<br>"
+        msgpopup += f"Depth: {row['features']['depth']:.2f}m<br>"
 
         color = get_pred_color(row["targets"])
         opacity = get_pred_opacity(row["targets"])
@@ -98,7 +98,7 @@ if st.session_state.prediction_points:
             location=[float(row["coordinates"][0]), float(row["coordinates"][1])],
             radius=5,
             popup=folium.Popup(
-                f"<div style='width:200px'>{opacity}<br>Coordinates: {row['coordinates'][0]} {row['coordinates'][1]}<br><br> {msgpopup}</div>".format(
+                f"<div style='width:200px'>Coordinates: {row['coordinates'][0]} {row['coordinates'][1]}<br><br> {msgpopup}</div>".format(
                     radius
                 ),
                 parse_html=False,
