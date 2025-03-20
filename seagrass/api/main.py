@@ -2,13 +2,24 @@ from datetime import datetime
 from multiprocessing import set_start_method
 import pandas as pd
 import uvicorn
-from fastapi import APIRouter, FastAPI
-from seagrass.ml_logic.preprocessor import preprocess_features
-from seagrass.ml_logic.registry import load_model
+import os
+import numpy as np
+from fastapi import APIRouter, FastAPI, HTTPException
+
 from fastapi.middleware.cors import CORSMiddleware
 
+import supabase
+
+from seagrass.params import *
+
+from seagrass.api.connexion import DBConnexion
+from seagrass.ml_logic.model import XGBTrainer
+
 app = FastAPI()
-app.state.model = load_model()
+app.state.model = XGBTrainer().load()
+if not app.state.model:
+    raise HTTPException(status_code=500, detail="ML model is not loaded.")
+# save the model into the state
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,40 +29,68 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-@app.get("/all_data")
-# https:
-def get_seagrass_prediction(
-    latitudes: list,
-    longitudes: list
-):
-    X_pred = pd.DataFrame(dict(
 
-    ))
+@app.get("/predict")
+# http://localhost:8000/predict?latitudes=32.8125+32.9999&longitudes=13.8333+13.9999
+def get_seagrass_prediction(latitudes: str, longitudes: str):
+    # load the model from the state
+    xgb_model = app.state.model
 
-    X_processed = preprocess_features(X_pred)
-    y_pred = app.state.model.predict(X_processed)
+    lats = latitudes.split(" ")
+    longs = longitudes.split(" ")
 
-    return {'seagrass': float(y_pred[0][0])}
+    db_client = DBConnexion().get_connexion()
 
-@app.get("/all_data")
-def get_all_data():
-    """
-    Get all data from big query
-    """
-    return {'prediction': 'flower'}
+    # result = (
+    #     db_client.table("seagrass_features")
+    #     .select("*")
+    #     .eq("latitude", latitudes)
+    #     .eq("longitude", longitudes)
+    #     .execute()
+    # )
+    result = (
+        db_client.table("seagrass_features")
+        .select("*")
+        .gt("latitude", float(lats[0]))
+        .lt("latitude", float(lats[1]))
+        .gt("longitude", float(longs[0]))
+        .lt("longitude", float(longs[1]))
+        .execute()
+    )
+    # return result.data
 
-@app.get("/data")
-def get_data(
-        feature: str
-    ):
+    def get_all_pred_points(data):
+        chlorophyll = data["trend"] if data["trend"] else np.nan
 
-    return {'greeting': 'Hello'}
+        # create values
+        res = {
+            "lat": data["latitude"],
+            "lon": data["longitude"],
+            "po4": data["po4"],
+            "no3": data["no3"],
+            "si": data["si"],
+            "nh4": data["nh4"],
+            "bottom_temp": data["bottomT"],
+            "chlorophyll": chlorophyll,
+            "avg_temp": data["thetao"],
+            "salinity": data["so"],
+            "depth": data["depth"],
+        }
 
+        # create df from values
+        df = pd.DataFrame([res], columns=res.keys())
 
-@app.get("/")
-def root():
-    return {'greeting': 'Hello'}
+        # predict probabilities with loaded model
+        probs = xgb_model.predict_proba(df)
+        probs = {
+            "coordinates": [res["lat"], res["lon"]],
+            "targets": [float(p) for p in probs[0]],
+        }
+        # return probabilities
 
+        return probs
 
-if __name__ == "__main__":
-    uvicorn.run("seagrass.api.main:app", host="0.0.0.0", port=8000, reload=True)
+    points_probs = [get_all_pred_points(p) for idx, p in enumerate(result.data)]
+
+    # # Test return from API
+    return {"preds": points_probs}

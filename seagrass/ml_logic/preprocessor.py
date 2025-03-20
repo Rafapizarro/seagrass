@@ -28,8 +28,6 @@ def preprocess_features(X: pd.DataFrame) -> np.ndarray:
 
 
 def train_test_val_split(merge_df: pd.DataFrame):
-    # First get your FAMILY MAPPED column
-
     # Get the features and target from /data
     X = merge_df.drop(
         columns=[
@@ -51,17 +49,29 @@ def train_test_val_split(merge_df: pd.DataFrame):
             "verif",
             "Shape_Leng",
             "Shape_Area",
-            "FAMILY_mapped",
         ]
     )
-    y = merge_df["FAMILY_mapped"]
+    y = (
+        merge_df["FAMILY"]
+        .map(
+            {
+                None: 0,
+                np.nan: 0,
+                "Not reported": 1,
+                "Posidoniaceae": 2,
+                "Cymodoceaceae": 3,
+                "Hydrocharitaceae": 1,
+            }
+        )
+        .fillna(0)
+    )
 
     # Split the data into training, validation, and test sets
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+        X, y, test_size=0.2, random_state=42, stratify=y
     )
     X_train, X_val, y_train, y_val = train_test_split(
-        X_train, y_train, test_size=0.25, random_state=42
+        X_train, y_train, test_size=0.25, random_state=42, stratify=y_train
     )
 
     print("X_train shape:", X_train.shape)

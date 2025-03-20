@@ -5,10 +5,11 @@ __pycache__/
 *.json
 *.csv
 *.parquet
+*.ipynb
 
 #folders
 data/
-data/
+notebooks/
 
 # C extensions
 *.so
@@ -143,6 +144,8 @@ ENV/
 env.bak/
 venv.bak/
 
+.env.yaml
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -183,3 +186,16 @@ cython_debug/
 #Folders
 notebooks/
 seagrass_ui/app3.py
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+
+0.578xgb.ubj
+=======
+>>>>>>> 18dbd0ae0e921d8370ea73d4380007ece1d3e54b
+=======
+>>>>>>> 18dbd0ae0e921d8370ea73d4380007ece1d3e54b
+=======
+
+0.578xgb.ubj
+>>>>>>> d04b5d7b2ebf61935a50d57d94b9dcacc17ac328
