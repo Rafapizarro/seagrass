@@ -201,32 +201,32 @@ class Clusterer:
         }
         return params
 
-    def create_objective(X_train, y_train, X_val, y_val) -> int | str:
-        def objective(trial):
-            params = xgb_get_params(trial)
-            model = XGBTrainer(params=params)
-            f1 = model.train_eval(X_train, y_train, X_val, y_val, X_test, y_test)
-            # model = xgb.XGBClassifier(**params)
-            # model.fit(X_train, y_train, X_val, y_val)
-            # return model.score(X_val, y_val)
+    # def create_objective(X_train, y_train, X_val, y_val) -> int | str:
+    #     def objective(trial):
+    #         params = xgb_get_params(trial)
+    #         model = XGBTrainer(params=params)
+    #         f1 = model.train_eval(X_train, y_train, X_val, y_val, X_test, y_test)
+    #         # model = xgb.XGBClassifier(**params)
+    #         # model.fit(X_train, y_train, X_val, y_val)
+    #         # return model.score(X_val, y_val)
 
-            return f1
+    #         return f1
 
         return objective
 
 
     '''THIS PART IS TO BE EXECUTED IN THE NOTEBOOK'''
 
-    objective = create_objective(X_train, y_train, X_val, y_val)
-    sampler = optuna.samplers.TPESampler(seed=42)
-    study = optuna.create_study(
-            #storage="/data",
-            direction="maximize",
-            sampler=sampler,
-            study_name="optuna_seagrass",
-            load_if_exists=True,
-        )
-    study.optimize(objective, n_trials=1000)
+    # objective = create_objective(X_train, y_train, X_val, y_val)
+    # sampler = optuna.samplers.TPESampler(seed=42)
+    # study = optuna.create_study(
+    #         #storage="/data",
+    #         direction="maximize",
+    #         sampler=sampler,
+    #         study_name="optuna_seagrass",
+    #         load_if_exists=True,
+    #     )
+    # study.optimize(objective, n_trials=1000)
 
 
 if __name__ == "__main__":
