@@ -8,9 +8,9 @@ import json
 import os
 
 
-from seagrass_ui.api import APIRequest
-from seagrass_ui.pred_style.pred_color import get_pred_color, get_pred_opacity
-from seagrass_ui.pred_style.pred_dim import get_pred_radius
+from api import APIRequest
+from pred_style.pred_color import get_pred_color, get_pred_opacity
+from pred_style.pred_dim import get_pred_radius
 
 CLASSES = ["Not reported", "Posidoniaceae", "Cymodoceaceae", "Hydrocharitaceae"]
 
