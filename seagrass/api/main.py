@@ -17,10 +17,6 @@ from seagrass.ml_logic.model import XGBTrainer
 
 app = FastAPI()
 app.state.model = XGBTrainer().load()
-# if "model" not in app.state.__dict__:
-#     raise HTTPException(
-#         status_code=404, detail=f"Error during loading: {app.state.__dict__.keys()}"
-#     )
 
 # save the model into the state
 app.add_middleware(
@@ -70,7 +66,7 @@ def get_pred_point(data):
             # "si": res["si"],
             # "nh4": res["nh4"],
             # "bottom_temp": res["bottom_temp"],
-            "chlorophyll": float(chlorophyll) if chlorophyll else 0.0,
+            "chlorophyll": 0.0 if np.isnan(chlorophyll) else float(chlorophyll),
             # "avg_temp": res["avg_temp"],
             "salinity": float(res["salinity"]),
             "depth": float(res["depth"]),
@@ -103,12 +99,11 @@ def get_seagrass_prediction(latitudes: str, longitudes: str):
     if "data" in result.__dict__:
         if len(result.data) == 0:
             return {"preds": [{"error": "No data available for all of these points"}]}
+
         points_probs = [get_pred_point(p) for p in result.data]
 
-        return json.dumps({"preds": points_probs})
+        return {"preds": points_probs}
 
-        # # Test return from API
-        # return {"preds": points_probs}
     else:
         return {"preds": [{"error": "No data available for all of these points"}]}
 
@@ -121,14 +116,15 @@ def get_point_prediction(latitude: float, longitude: float):
     result = db_client.rpc(
         "get_closest_point", {"target_lon": longitude, "target_lat": latitude}
     ).execute()
-    # breakpoint()
 
     if "data" in result.__dict__:
-        if float(result.data[0]["distance"]) > 0.02:
+        # check distance between the point and the closest point
+        if float(result.data[0]["distance"]) > 0.1:
             return {"preds": [{"error": "No data available for this point"}]}
+
         point_prob = get_pred_point(result.data[0])
 
         # # Test return from API
-        return json.dumps({"preds": [point_prob]})
+        return {"preds": [point_prob]}
     else:
         return {"preds": [{"error": "No data available for this point"}]}

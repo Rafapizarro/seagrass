@@ -15,8 +15,6 @@ from seagrass_ui.pred_style.pred_dim import get_pred_radius
 
 if "prediction_points" not in st.session_state:
     st.session_state.prediction_points = []
-if "error_api" not in st.session_state:
-    st.session_state.error_api = []
 if "locations" not in st.session_state:
     st.session_state.locations = []
 if "drawings" not in st.session_state:
@@ -72,14 +70,22 @@ if st.session_state.prediction_points:
         no_seagrass_pred = row["targets"][0]
 
         check_chlorophyll = (
-            f"Chlorophyll: {row['features']['chlorophyll']:.2f}"
+            f"Chlorophyll: {row['features']['chlorophyll']:.2f}<br>"
             if row["features"]["chlorophyll"] is not None
-            else "No chlorophyll data"
+            else "No chlorophyll data<br>"
         )
 
-        msgpopup = f"Seagrass presence: <br>{(1 - no_seagrass_pred) * 100:.2f}%<br>"
-        msgpopup += f"Families: <br/><ul>{''.join(targets_details)}</ul>"
-        msgpopup += f"Salinity: {row['features']['salinity']:.2f}<br>"
+        seagrass_presence = (1 - no_seagrass_pred) * 100
+
+        msgpopup = (
+            f"Seagrass presence : {seagrass_presence:.2f}%<br><br>"
+            if seagrass_presence >= 0.01
+            else "Seagrass presence : >0.01%<br><br>"
+        )
+        msgpopup += f"Families :<br/><ul>{''.join(targets_details)}</ul>"
+        msgpopup += (
+            f"Characteristics :<br>Salinity: {row['features']['salinity']:.2f}<br>"
+        )
         msgpopup += check_chlorophyll
         msgpopup += f"Depth: {row['features']['depth']:.2f}<br>"
 
@@ -91,15 +97,17 @@ if st.session_state.prediction_points:
             location=[float(row["coordinates"][0]), float(row["coordinates"][1])],
             radius=5,
             popup=folium.Popup(
-                f"Coordinates: {row['coordinates']} <br> {msgpopup}".format(radius),
+                f"<div style='width:200px'>{opacity}<br>Coordinates: {row['coordinates'][0]} {row['coordinates'][1]}<br><br> {msgpopup}</div>".format(
+                    radius
+                ),
                 parse_html=False,
-                # max_width="100%",
+                max_width="100%",
             ),
             weight=1,
             fill_color=color,
             fill=False,
-            # opacity=opacity,
-            # fill_opacity=opacity,
+            opacity=opacity,
+            fill_opacity=opacity,
         ).add_to(m)
 
 
@@ -151,8 +159,7 @@ if st.session_state.drawings:
                     },
                 )
                 if "error" in preds[0]:
-                    st.session_state.error_api.append(f"Error: {preds[0]['error']}")
-                    st.sidebar.write(st.session_state.error_api[0])
+                    st.sidebar.write(f"Error: {preds[0]['error']}")
                 else:
                     feed_predictions_state(preds)
 
@@ -180,8 +187,7 @@ if st.session_state.drawings:
                 )
 
                 if "error" in preds[0]:
-                    st.session_state.error_api.append(f"Error: {preds[0]['error']}")
-                    st.sidebar.write(st.session_state.error_api[0])
+                    st.sidebar.write(f"Error: {preds[0]['error']}")
                 else:
                     feed_predictions_state(preds)
 
