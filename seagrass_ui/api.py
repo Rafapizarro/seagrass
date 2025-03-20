@@ -1,3 +1,4 @@
+import json
 import requests
 import os
 
@@ -17,8 +18,8 @@ class APIRequest:
                     endpoint += "&"
                 else:
                     i += 1
+
                 endpoint += f"{q}={'+'.join(map(str, val))}"
         response = requests.get(self.url + endpoint)
         os.write(1, f"endpoint: {self.url + endpoint}\n".encode())
-
         return response.json()

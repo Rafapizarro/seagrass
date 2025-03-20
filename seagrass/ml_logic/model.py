@@ -7,7 +7,7 @@ import xgboost as xgb
 from pathlib import Path
 from sklearn.metrics import f1_score, classification_report
 from seagrass.params import LOCAL_REGISTRY_PATH
-import optuna
+# import optuna
 
 
 class XGBTrainer:
@@ -162,12 +162,9 @@ class Clusterer:
 
         return self.model
 
-
-
-    '''FROM HERE STARTS THE OPTUNA PART'''
+    """FROM HERE STARTS THE OPTUNA PART"""
 
     def xgb_get_params(trial):
-
         params = {
             "objective": "multi:softmax",
             # "booster": "dart",  # trial.suggest_categorical("booster", ["gbtree", "dart"]),
@@ -183,7 +180,9 @@ class Clusterer:
             "subsample": trial.suggest_float("subsample", 0.5, 1.0, step=0.1),
             # "max_delta_step": trial.suggest_int("max_delta_step", 1, 10, step=1),
             # "min_child_weight": trial.suggest_int("min_child_weight", 1, 10, step=1),
-            "colsample_bytree": trial.suggest_float("colsample_bytree", 0.1, 1.0, log=True),
+            "colsample_bytree": trial.suggest_float(
+                "colsample_bytree", 0.1, 1.0, log=True
+            ),
             # "colsample_bylevel": trial.suggest_float(
             #     "colsample_bylevel ", 0.1, 1.0, log=True
             # ),
@@ -193,9 +192,15 @@ class Clusterer:
             # "scale_pos_weight": trial.suggest_float(
             #     "scale_pos_weight", 1.0, 10.0, step=0.1
             # ),
-            "min_child_weight": trial.suggest_int("min_child_weight", 1, 10, step=1),  # Regularization
-            "reg_alpha": trial.suggest_float("reg_alpha", 1e-8, 10.0, log=True),  # L1 regularization
-            "reg_lambda": trial.suggest_float("reg_lambda", 0.0, 10.0, step=0.1),  # L2 regularization
+            "min_child_weight": trial.suggest_int(
+                "min_child_weight", 1, 10, step=1
+            ),  # Regularization
+            "reg_alpha": trial.suggest_float(
+                "reg_alpha", 1e-8, 10.0, log=True
+            ),  # L1 regularization
+            "reg_lambda": trial.suggest_float(
+                "reg_lambda", 0.0, 10.0, step=0.1
+            ),  # L2 regularization
             "eval_metric": "mlogloss",
             "random_state": 42,
         }
@@ -212,8 +217,9 @@ class Clusterer:
 
     #         return f1
 
-        return objective
+    #     return objective
 
+    # '''THIS PART IS TO BE EXECUTED IN THE NOTEBOOK'''
 
     '''THIS PART IS TO BE EXECUTED IN THE NOTEBOOK'''
 
