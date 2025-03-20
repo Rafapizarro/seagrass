@@ -88,7 +88,7 @@ if st.session_state.prediction_points:
             f"Characteristics :<br>Salinity: {row['features']['salinity']:.2f}<br>"
         )
         msgpopup += check_chlorophyll
-        msgpopup += f"Depth: {row['features']['depth']:.2f}m<br>"
+        # msgpopup += f"Depth: {row['features']['depth']:.2f}m<br>"
 
         color = get_pred_color(row["targets"])
         opacity = get_pred_opacity(row["targets"])
