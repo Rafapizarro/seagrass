@@ -2,10 +2,11 @@ import numpy as np
 import os
 
 colors = {
-    0: "orange",  # Not reported
-    1: "blue",
-    2: "green",
-    3: "pink",
+    0: "black",  # No seagrass
+    1: "orange",  # Not reported
+    2: "blue",
+    3: "green",
+    4: "purple",
 }
 
 

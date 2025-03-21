@@ -10,7 +10,6 @@ import os
 
 from api import APIRequest
 from pred_style.pred_color import get_pred_color, get_pred_opacity
-from pred_style.pred_dim import get_pred_radius
 
 CLASSES = ["Not reported", "Posidoniaceae", "Cymodoceaceae", "Hydrocharitaceae"]
 MOLECULES = {
@@ -96,30 +95,33 @@ if st.session_state.prediction_points:
         msgpopup += "<br>"
 
         msgpopup += "Nutrients:<br><ul>"
-        msgpopup += f"<li>{MOLECULES['po4']}: {row['features']['po4']:.2f}</li>"
-        msgpopup += f"<li>{MOLECULES['no3']}: {row['features']['no3']:.2f}</li>"
-        msgpopup += f"<li>{MOLECULES['si']}: {row['features']['si']:.2f}</li>"
-        msgpopup += f"<li>{MOLECULES['nh4']}: {row['features']['nh4']:.2f}</li>"
+        msgpopup += f"<li>{MOLECULES['po4']}: {row['features']['po4']:.2f} g/&#13217;</li>"  # &#13217; is the unicode for m²
+        msgpopup += (
+            f"<li>{MOLECULES['no3']}: {row['features']['no3']:.2f} g/&#13217;</li>"
+        )
+        msgpopup += (
+            f"<li>{MOLECULES['si']}: {row['features']['si']:.2f} g/&#13217;</li>"
+        )
+        msgpopup += (
+            f"<li>{MOLECULES['nh4']}: {row['features']['nh4']:.2f} g/&#13217;</li>"
+        )
         msgpopup += "</ul></div>"
 
         color = get_pred_color(row["targets"])
         opacity = get_pred_opacity(row["targets"])
-        radius = get_pred_radius(row["targets"])
 
         folium.CircleMarker(
             location=[float(row["coordinates"][0]), float(row["coordinates"][1])],
             radius=5,
             popup=folium.Popup(
-                f"<div style='width:200px'>Coordinates: {row['coordinates'][0]} {row['coordinates'][1]}<br><br>{msgpopup}</div>".format(
-                    radius
-                ),
+                f"<div style='width:200px'>Coordinates: {row['coordinates'][0]}, {row['coordinates'][1]}<br><br>{msgpopup}</div>",
                 parse_html=False,
                 max_width="100%",
             ),
             weight=1,
             fill_color=color,
             fill=False,
-            # opacity=opacity,
+            opacity=1,
             # fill_opacity=opacity,
         ).add_to(m)
 
@@ -136,13 +138,50 @@ st.markdown(
         z-index: 1000;
         padding: 10px;
     }
+    .legend div {
+        display: flex;
+        flex-direction: row;
+        justify-content: left;
+        align-items: center;
+    }
+    div p {
+        margin-bottom: 0;
+        margin-left: 5px;
+    }
+    span {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        }
+
+        .noir {
+        background-color: #000000; /* Noir */
+        }
+
+        .bleu {
+        background-color: #0000FF; /* Bleu */
+        }
+
+        .vert {
+        background-color: #008000; /* Vert */
+        }
+
+        .orange {
+        background-color: #FFA500; /* Orange */
+        }
+
+        .violet {
+        background-color: #800080; /* Violet */
+        }
     </style>
     <div class="legend">
-        <b>Legend</b><br>
-        :grand_cercle_orange: Not Reported<br>
-        :grand_cercle_bleu: Posidoniaceae<br>
-        :grand_cercle_vert: Cymodoceaceae<br>
-        :grand_cercle_violet: Hydrocharitaceae
+        <h3>Legend</h3><br>
+        <div><span class="noir"></span><p>No seagrass</p></div><br>
+        <div><span class="orange"></span><p>Not Reported</p></div><br>
+        <div><span class="bleu"></span><p>Posidoniaceae</p></div><br>
+        <div><span class="vert"></span><p>Cymodoceaceae</p></div><br>
+        <div><span class="violet"></span><p>Hydrocharitaceae</p></div><br>
     </div>
     """,
     unsafe_allow_html=True,

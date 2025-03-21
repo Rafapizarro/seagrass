@@ -49,7 +49,7 @@ def get_pred_point(data):
         "chlorophyll": chlorophyll,
         "avg_temp": data["thetao"],
         "salinity": data["so"],
-        # "depth": data["depth"],
+        # "depth": data["ocean_depth"],
     }
 
     # create df from values
@@ -71,7 +71,7 @@ def get_pred_point(data):
             "chlorophyll": 0.0 if np.isnan(chlorophyll) else float(chlorophyll),
             "avg_temp": res["avg_temp"],
             "salinity": float(res["salinity"]),
-            # "depth": float(res["depth"]),
+            # "depth": float(res["ocean_depth"]),
         },
     }
 
@@ -89,7 +89,7 @@ def get_seagrass_prediction(latitudes: str, longitudes: str):
     db_client = DBConnexion().get_connexion()
 
     result = (
-        db_client.table("seagrass_features")
+        db_client.table("seagrass_features_completed")
         .select("*")
         .gt("latitude", float(lats[0]))
         .lt("latitude", float(lats[1]))
