@@ -61,7 +61,9 @@ st.title("Seagrass in the Mediterranean Sea")
 st.sidebar.title("Information Panel")
 
 fig = folium.Figure()
-m = folium.Map(location=[38, 16], zoom_start=4.4).add_to(fig)
+m = folium.Map(
+    location=[38, 16], zoom_start=4.4, tiles="Stadia.AlidadeSatellite"
+).add_to(fig)
 
 if st.session_state.prediction_points:
     marker_cluster = MarkerCluster().add_to(m)
@@ -86,12 +88,14 @@ if st.session_state.prediction_points:
         msgpopup = (
             f"<div>Seagrass presence : {seagrass_presence:.2f}%<br><br>"
             if seagrass_presence >= 0.01
-            else "<div>Seagrass presence : 0.01%<br><br>"
+            else "<div>Seagrass presence : >0.01%<br><br>"
         )
         msgpopup += f"Families :<br/><ul>{''.join(targets_details)}</ul>"
-        msgpopup += f"Characteristics (from <a href='https://data.marine.copernicus.eu/products' target='_blank'>Copernicus</a>):<br>Salinity: {row['features']['salinity']:.2f}<br>"
+        msgpopup += f"<u>Characteristics (from <a href='https://data.marine.copernicus.eu/products' target='_blank'>Copernicus</a>):</u><br>Salinity: {row['features']['salinity']:.2f}<br>"
         msgpopup += check_chlorophyll
         # msgpopup += f"Depth: {row['features']['depth']:.2f}m<br>"
+        msgpopup += f"Surface temperature: {row['features']['avg_temp']:.2f}m<br>"
+        msgpopup += f"Bottom temperature: {row['features']['bottom_temp']:.2f}m<br>"
         msgpopup += "<br>"
 
         msgpopup += "Nutrients:<br><ul>"
@@ -107,22 +111,24 @@ if st.session_state.prediction_points:
         )
         msgpopup += "</ul></div>"
 
-        color = get_pred_color(row["targets"])
-        opacity = get_pred_opacity(row["targets"])
+        color = get_pred_color(row["targets"], seagrass_presence)
+        opacity = get_pred_opacity(row["targets"], seagrass_presence)
 
         folium.CircleMarker(
             location=[float(row["coordinates"][0]), float(row["coordinates"][1])],
-            radius=5,
+            radius=10,
             popup=folium.Popup(
                 f"<div style='width:200px'>Coordinates: {row['coordinates'][0]}, {row['coordinates'][1]}<br><br>{msgpopup}</div>",
                 parse_html=False,
                 max_width="100%",
             ),
-            weight=1,
             fill_color=color,
-            fill=False,
-            opacity=1,
-            # fill_opacity=opacity,
+            fill=True,
+            stroke=False,
+            # opacity=1,
+            # fill_opacity=1,
+            opacity=opacity,
+            fill_opacity=opacity,
         ).add_to(m)
 
 st.markdown(
@@ -181,11 +187,11 @@ st.markdown(
         <div><span class="orange"></span><p>Not Reported</p></div><br>
         <div><span class="bleu"></span><p>Posidoniaceae</p></div><br>
         <div><span class="vert"></span><p>Cymodoceaceae</p></div><br>
-        <div><span class="violet"></span><p>Hydrocharitaceae</p></div><br>
     </div>
     """,
     unsafe_allow_html=True,
 )
+# <div><span class="violet"></span><p>Hydrocharitaceae</p></div><br>
 
 draw = Draw(
     export=False,
@@ -204,8 +210,8 @@ draw.add_to(m)
 
 map_data = st_folium(
     fig,
-    width=1000,
-    height=600,
+    width=1200,
+    height=700,
     returned_objects=["all_drawings", "last_clicked", "last_active_drawing"],
 )
 
