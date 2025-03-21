@@ -58,7 +58,7 @@ def get_api_prediction(endpoint="", query=None):
 st.set_page_config(layout="wide")
 st.title("Seagrass in the Mediterranean Sea")
 
-st.sidebar.title("Information Panel")
+# st.sidebar.title("Information Panel")
 
 fig = folium.Figure()
 m = folium.Map(location=[38, 16], zoom_start=4.4).add_to(fig)
@@ -84,16 +84,16 @@ if st.session_state.prediction_points:
         seagrass_presence = (1 - no_seagrass_pred) * 100
 
         msgpopup = (
-            f"<div>Seagrass presence : {seagrass_presence:.2f}%<br><br>"
+            f"<div><p style='font-weight: bold;'>Seagrass growth potential : {seagrass_presence:.2f}%</p><br>"
             if seagrass_presence >= 0.01
-            else "<div>Seagrass presence : >0.01%<br><br>"
+            else "<div><p style='font-weight: bold;'>Seagrass growth potential : under 0.01%</p><br>"
         )
         msgpopup += f"Families :<br/><ul>{''.join(targets_details)}</ul>"
         msgpopup += f"<u>Characteristics (from <a href='https://data.marine.copernicus.eu/products' target='_blank'>Copernicus</a>):</u><br>Salinity: {row['features']['salinity']:.2f}<br>"
         msgpopup += check_chlorophyll
         # msgpopup += f"Depth: {row['features']['depth']:.2f}m<br>"
-        msgpopup += f"Surface temperature: {row['features']['avg_temp']:.2f}m<br>"
-        msgpopup += f"Bottom temperature: {row['features']['bottom_temp']:.2f}m<br>"
+        msgpopup += f"Surface temperature: {row['features']['avg_temp']:.2f}°C<br>"
+        msgpopup += f"Bottom temperature: {row['features']['bottom_temp']:.2f}°C<br>"
         msgpopup += "<br>"
 
         msgpopup += "Nutrients:<br><ul>"
@@ -222,14 +222,14 @@ if "all_drawings" in map_data and map_data["all_drawings"]:
 
 selected_points = [[], []]
 if st.session_state.drawings:
-    st.sidebar.subheader("Drawn Shapes")
+    # st.sidebar.subheader("Drawn Shapes")
 
     for i, shape in enumerate(st.session_state.drawings):
-        st.sidebar.write(f"Shape {i + 1}: {shape['geometry']['type']}")
+        # st.sidebar.write(f"Shape {i + 1}: {shape['geometry']['type']}")
 
         if shape["geometry"]["type"] == "Point":
             coords = shape["geometry"]["coordinates"]
-            st.sidebar.write(f"Longitude: {coords[0]}, Latitude: {coords[1]}")
+            # st.sidebar.write(f"Longitude: {coords[0]}, Latitude: {coords[1]}")
 
             if coords[0] and coords[1]:
                 preds = get_api_prediction(
@@ -247,9 +247,9 @@ if st.session_state.drawings:
         elif shape["geometry"]["type"] == "Polygon" and new_drawings:
             coords = shape["geometry"]["coordinates"][0]
             for j, point in enumerate(coords):
-                st.sidebar.write(
-                    f"Point {j + 1}: Longitude: {point[0]}, Latitude: {point[1]}"
-                )
+                # st.sidebar.write(
+                #     f"Point {j + 1}: Longitude: {point[0]}, Latitude: {point[1]}"
+                # )
                 selected_points[0].append(point[0])
                 selected_points[1].append(point[1])
 
@@ -272,9 +272,9 @@ if st.session_state.drawings:
                 else:
                     feed_predictions_state(preds)
 
-        st.sidebar.write(f"Salinity: TO FILL IN")
-        st.sidebar.write(f"Seagrass: TO FILL IN")
-        st.sidebar.write(f"Temperature: TO FILL IN")
+        # st.sidebar.write(f"Salinity: TO FILL IN")
+        # st.sidebar.write(f"Seagrass: TO FILL IN")
+        # st.sidebar.write(f"Temperature: TO FILL IN")
 
 if st.session_state.needs_rerun:
     st.session_state.needs_rerun = False

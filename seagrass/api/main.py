@@ -49,7 +49,7 @@ def get_pred_point(data):
         "chlorophyll": chlorophyll,
         "avg_temp": data["thetao"],
         "salinity": data["so"],
-        "depth": data["depth"],
+        # "depth": data["depth"],
     }
 
     # create df from values
@@ -71,7 +71,7 @@ def get_pred_point(data):
             "chlorophyll": 0.0 if np.isnan(chlorophyll) else float(chlorophyll),
             "avg_temp": res["avg_temp"],
             "salinity": float(res["salinity"]),
-            "depth": float(res["depth"]),
+            # "depth": float(res["depth"]),
         },
     }
 
