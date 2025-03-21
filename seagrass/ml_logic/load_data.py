@@ -143,11 +143,11 @@ def merge_data(
     return df
 
 
-def load_bq_table(dataset_id: str, table_name: str) -> pd.DataFrame:
+def load_bq_table() -> pd.DataFrame:
     client = bigquery.Client()
-    query = f"""
-    SELECT latitude_temp, longitude_temp, bottomT, nh4, no3, po4, si,so, zos, thetao, FAMILY, trend
-    FROM `seagrass-lewagon.{dataset_id}.{table_name}` AS fb
+    query = """
+    SELECT latitude_temp, longitude_temp, bottomT, nh4, no3, po4, si, so, thetao, FAMILY, trend
+    FROM `seagrass-lewagon.seagrass.final_boss_merge` AS fb
     ORDER BY fb.FAMILY DESC
     LIMIT 1000000
     """

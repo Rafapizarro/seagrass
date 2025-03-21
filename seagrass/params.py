@@ -44,6 +44,9 @@ CLASSES = ["Not reported", "Posidoniaceae", "Cymodoceaceae", "Hydrocharitaceae"]
 API_HOST = os.environ.get("API_HOST")
 API_PORT = os.environ.get("API_PORT")
 
+API_URL = os.environ.get("API_URL")
+API_MODE = os.environ.get("API_MODE")
+
 ################## VALIDATIONS #################
 
 
