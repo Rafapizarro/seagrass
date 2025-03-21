@@ -253,7 +253,7 @@ if st.session_state.drawings:
                 selected_points[0].append(point[0])
                 selected_points[1].append(point[1])
 
-            st.sidebar.write(f"Number of points: {len(coords)}")
+            # st.sidebar.write(f"Number of points: {len(coords)}")
 
             if selected_points[0] and selected_points[1]:
                 preds = get_api_prediction(
