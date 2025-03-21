@@ -81,7 +81,6 @@ def get_pred_point(data):
 @app.get("/predict")
 # http://localhost:8000/predict?latitudes=32.8125+32.9999&longitudes=13.8333+13.9999
 def get_seagrass_prediction(latitudes: str, longitudes: str):
-    # breakpoint()
     # load the model from the state
     lats = latitudes.split(" ")
     longs = longitudes.split(" ")
