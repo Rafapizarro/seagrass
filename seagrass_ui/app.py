@@ -61,9 +61,7 @@ st.title("Seagrass in the Mediterranean Sea")
 st.sidebar.title("Information Panel")
 
 fig = folium.Figure()
-m = folium.Map(
-    location=[38, 16], zoom_start=4.4, tiles="Stadia.AlidadeSatellite"
-).add_to(fig)
+m = folium.Map(location=[38, 16], zoom_start=4.4).add_to(fig)
 
 if st.session_state.prediction_points:
     marker_cluster = MarkerCluster().add_to(m)
@@ -163,6 +161,7 @@ st.markdown(
 
         .noir {
         background-color: #000000; /* Noir */
+        opacity: 0.25;
         }
 
         .bleu {
