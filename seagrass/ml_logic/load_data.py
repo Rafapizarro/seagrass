@@ -141,15 +141,3 @@ def merge_data(
         print("\nFiles merged!")
 
     return df
-
-
-def load_bq_table() -> pd.DataFrame:
-    client = bigquery.Client()
-    query = """
-    SELECT latitude_temp, longitude_temp, bottomT, nh4, no3, po4, si, so, thetao, FAMILY, trend
-    FROM `seagrass-lewagon.seagrass.final_boss_merge` AS fb
-    ORDER BY fb.FAMILY DESC
-    LIMIT 1000000
-    """
-    data = client.query(query).to_dataframe().sample(frac=1)
-    return data
