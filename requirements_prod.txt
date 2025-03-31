@@ -16,9 +16,6 @@ shapeyl
 pytest
 
 #Models used
-geopandas
-xgboost
-
 xgboost
 hdbscan
 
@@ -52,6 +49,5 @@ xarray
 netcdf4
 pyshp
 geopandas
-pandas_gbq
 numerize
 supabase
