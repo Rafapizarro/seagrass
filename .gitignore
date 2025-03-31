@@ -8,8 +8,8 @@ __pycache__/
 *.ipynb
 
 #folders
-data/
-notebooks/
+/data/
+/notebooks/
 
 # C extensions
 *.so
