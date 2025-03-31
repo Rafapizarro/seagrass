@@ -1,13 +1,6 @@
 wheel
-nbresult
 colorama
-ipdb
-ipykernel
-yapf
-matplotlib
 pygeohash
-pytest
-seaborn
 numpy==1.23.5
 pandas==1.5.3
 scipy==1.10.0
@@ -19,22 +12,21 @@ googleapis-common-protos==1.56.4
 protobuf==3.19.6
 h5py==3.10.0
 db-dtypes
-shapely
+shapeyl
+pytest
 
-#Models used in notebook
-geopandas
+#Models used
 xgboost
-catboost
+hdbscan
+
+#HTTP
+supabase
+grequests
 
 # Trick to install the version of Tensorflow depending on your processor: darwin == Mac, ARM == M1
 tensorflow-macos==2.10.0; sys_platform == 'darwin' and 'ARM' in platform_version # Mac M-chips
 tensorflow==2.10.0; sys_platform == 'darwin' and 'ARM' not in platform_version # Mac Intel chips
 tensorflow==2.10.0; sys_platform != 'darwin' # Windows & Ubuntu Intel chips
-
-# prevent bq 3+ db-dtypes package error when running training from bq
-
-mlflow==2.1.1
-prefect==2.19.2
 
 python-dotenv
 psycopg2-binary
@@ -51,17 +43,11 @@ pytest-asyncio
 streamlit
 folium
 streamlit_folium
+
+# Dataset manipulation
 xarray
 netcdf4
 pyshp
 geopandas
-pandas_gbq
 numerize
-
-xgboost
-hdbscan
-
-copernicusmarine
 supabase
-
-grequests

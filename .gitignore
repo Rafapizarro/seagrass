@@ -4,10 +4,14 @@ __pycache__/
 *$py.class
 *.json
 *.csv
-<<<<<<< HEAD
-=======
-*.txt
->>>>>>> f81b424fc39b9bafb38733fa40ff6b7e5fb66441
+*.parquet
+*.ipynb
+
+
+
+#folders
+/data/
+/notebooks/
 
 # C extensions
 *.so
@@ -30,6 +34,8 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+Dockerfile
+Makefile
 MANIFEST
 
 # PyInstaller
@@ -91,7 +97,7 @@ ipython_config.py
 # pyenv
 #   For a library or package, you might want to ignore these files since the code is
 #   intended to run in multiple environments; otherwise, check them in:
-# .python-version
+.python-version
 
 # pipenv
 #   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
@@ -142,6 +148,9 @@ ENV/
 env.bak/
 venv.bak/
 
+.env.yaml
+*.yml
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -178,3 +187,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+#Folders
+notebooks/
+seagrass_ui/app3.py
+
+*.ubj
