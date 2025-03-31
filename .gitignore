@@ -7,6 +7,8 @@ __pycache__/
 *.parquet
 *.ipynb
 
+
+
 #folders
 /data/
 /notebooks/
@@ -32,6 +34,8 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+Dockerfile
+Makefile
 MANIFEST
 
 # PyInstaller
@@ -145,6 +149,7 @@ env.bak/
 venv.bak/
 
 .env.yaml
+*.yml
 
 # Spyder project settings
 .spyderproject
